@@ -39,6 +39,30 @@ All four live checks worked on the first try. The agent-written client needed no
 | `23.7266, 90.3925` | fire / motorcycle | Lalbagh Fire Station, 8 min | Result #3 is a *mosque inside the Fire Service HQ* tagged as a fire station: data-quality issue. Road distance is 2× the straight line (old Dhaka streets). |
 | `Uttara Sector 7, Dhaka` | police / drive (JSON) | Uttara Thana, 46 s | The sector name geocoded to the nearest highway, not the sector centre: coarse result for informal sector names. |
 
+## 2026-10-18: second feature, places of worship and their size
+
+Request: show nearby mosques and how big each one is, and do the same for every religion.
+
+What was checked against the live API before writing code:
+- The Places spec has `religion.place_of_worship` with subcategories `islam`, `hinduism`,
+  `christianity`, `buddhism`, `sikhism`, `judaism`, `multifaith`, `shinto`.
+- The live MCP `search_places` call returns **points only** (name, address, distance, place_id).
+  There is no MCP tool for place details or building outlines. So an MCP-only agent cannot measure a
+  place's size. The first MCP call also failed because the argument is `radius_meters`, not `radius`.
+  The MCP server's error (`"radius" is not allowed`) was clear enough to fix it straight away.
+- The Place Details API (`features=details,building`) returns the place's own outline (`details`)
+  and/or the building that contains it (`building`). The area comes from the polygon.
+
+Live results:
+
+| Query | Result | Observation |
+|---|---|---|
+| Mirpur 10, mosques | 4 mosques, 1 to 2 min | 1 own outline (949 m²), 1 only a containing building (≤ 329 m²), 2 with no outline. Earlier test: "Shah Ali Plaza Market Masjid" got 2,083 m², which is the whole market building. This is why the containing building is shown as an upper bound. |
+| Dhakeshwari Temple, `--sort size` | Dhakeshwari National Temple 7,902 m², then smaller shrines | 7,902 m² is the **compound** outline, not one building, so the label "mapped outline" is used instead of "floor area". Unnamed shrines first showed the street name as their name (`address_line1` fallback); this was fixed. |
+| "BUET, Dhaka" | Geocoded to "BUET-TPHS Building" in Gulshan | Wrong: the BUET campus is in Palashi. Landmark and abbreviation geocoding is a benchmark item and feedback for Geoapify. |
+
+No `capacity` or `building:levels` tags were found on any mosque tested, so the size is an area, not a headcount.
+
 Ideas for the benchmark:
 - Filter or flag places whose name suggests a non-emergency facility ("Diagnostic", "Eye", "Mosque").
 - Record geocoding precision (`result_type`) for sector or road-number style addresses.
@@ -48,3 +72,5 @@ Ideas for the benchmark:
   "coordinate order" note at the top of each spec would help.
 - Local travel modes for South Asia (CNG / auto-rickshaw).
 - Bangla-script geocoding quality.
+- An MCP tool for place details or outlines (or a `geometry` option on `search_places`), so agents can
+  answer "how big is it?" with `measure_geometry` alone.

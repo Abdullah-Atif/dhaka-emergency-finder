@@ -74,6 +74,12 @@ class GeoapifyClient:
         }
         return self._request(f"{BASE_V2}/places", params).get("features", [])
 
+    def place_details(self, place_id, features=("details", "building"), lang="en"):
+        """Place Details API. Returns GeoJSON features; `details` is the place's own
+        geometry, `building` is the building that contains it."""
+        params = {"id": place_id, "features": ",".join(features), "lang": lang}
+        return self._request(f"{BASE_V2}/place-details", params).get("features", [])
+
     def route_matrix(self, source, targets, mode="drive", traffic="approximated"):
         """Route Matrix API with one source. source/targets are (lon, lat).
 

@@ -3,6 +3,8 @@
 import html
 import json
 
+from .finder import SIZE_HOST
+
 TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
@@ -19,7 +21,7 @@ TEMPLATE = """<!doctype html>
 </head>
 <body>
 <div id="map"></div>
-<div class="banner">Emergency? Call <b>999</b> first. {title}</div>
+<div class="banner" style="background: {banner_bg}">{banner}{title}</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const data = {data};
@@ -35,7 +37,9 @@ data.places.forEach((p, i) => {{
   bounds.push([p.lat, p.lon]);
   const mins = p.time_s == null ? 'no route' : Math.round(p.time_s / 60) + ' min';
   L.marker([p.lat, p.lon]).addTo(map)
-    .bindPopup('<b>#' + (i + 1) + ' ' + p.name + '</b><br>' + mins + '<br>' + p.address + (p.phone ? '<br>' + p.phone : ''));
+    .bindPopup('<b>#' + (i + 1) + ' ' + p.name + '</b><br>' + mins
+      + (p.area_m2 ? '<br>' + (p.area_approx ? '&le; ' : '') + Math.round(p.area_m2) + ' m²' : '')
+      + '<br>' + p.address + (p.phone ? '<br>' + p.phone : ''));
 }});
 if (data.route) {{
   const layer = L.geoJSON(data.route, {{style: {{color: '#b00020', weight: 5}}}}).addTo(map);
@@ -49,7 +53,7 @@ if (data.route) {{
 """
 
 
-def write_map(path, origin, facilities, route_feature, api_key, title=""):
+def write_map(path, origin, facilities, route_feature, api_key, title="", emergency=True):
     data = {
         "origin": {"lon": origin.lon, "lat": origin.lat, "label": origin.label},
         "places": [
@@ -60,6 +64,8 @@ def write_map(path, origin, facilities, route_feature, api_key, title=""):
                 "lon": f.lon,
                 "lat": f.lat,
                 "time_s": f.drive_s,
+                "area_m2": f.area_m2,
+                "area_approx": f.area_source == SIZE_HOST,
             }
             for f in facilities
         ],
@@ -69,6 +75,8 @@ def write_map(path, origin, facilities, route_feature, api_key, title=""):
         data=json.dumps(data, ensure_ascii=False).replace("</", "<\\/"),
         key=api_key,
         title=html.escape(title),
+        banner="Emergency? Call <b>999</b> first. " if emergency else "",
+        banner_bg="#b00020" if emergency else "#2e5d8a",
     )
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(page)

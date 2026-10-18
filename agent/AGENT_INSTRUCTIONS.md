@@ -41,6 +41,18 @@ hospital, clinic, pharmacy, police station, fire station or ambulance station.
    - one line if the straight-line closest facility is NOT the fastest to reach
    - the short route to #1
 
+## Places of worship (second feature)
+When the user asks for mosques, temples, churches or other places of worship:
+- Skip the 999 line. This is not an emergency request.
+- Use `search_places` with `religion.place_of_worship` for any religion, or with the exact
+  subcategory: `religion.place_of_worship.islam` (mosque), `.hinduism` (temple), `.christianity`
+  (church), `.buddhism`, `.sikhism`, `.judaism`, `.multifaith`.
+- Rank by travel time with `calculate_route_matrix`, exactly as above.
+- **Size:** `search_places` returns points only, and the MCP server has no tool for building outlines.
+  Do not guess sizes. Say that the size needs the Place Details API, and offer the CLI command:
+  `python -m dhaka_emergency "<location>" --type worship --religion islam --sort size`.
+  If the user gives you an outline polygon, `measure_geometry` with operation `area` can measure it.
+
 ## Language
 Reply in the user's language. If the user writes in Bangla, answer in Bangla but keep
 facility names as returned by the tools.
