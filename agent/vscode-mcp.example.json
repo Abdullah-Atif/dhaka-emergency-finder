@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "geoapify-key",
+      "description": "Geoapify API key",
+      "password": true
+    }
+  ],
+  "servers": {
+    "geoapify": {
+      "type": "http",
+      "url": "https://api.geoapify.com/v1/mcp",
+      "headers": {
+        "x-api-key": "${input:geoapify-key}"
+      }
+    }
+  }
+}

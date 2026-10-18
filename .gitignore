@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.vscode/mcp.json
+# Generated maps contain the API key
+*.html
+!docs/**/*.html
