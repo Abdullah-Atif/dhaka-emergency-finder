@@ -27,8 +27,21 @@ Points that needed care:
 - Phone numbers are not in one fixed field. The code checks `contact.phone`, then
   `datasource.raw.phone` and `contact:phone`.
 
-Not yet verified against the live API (needs a key): response field names for Places
-`contact`, and whether `traffic=approximated` is accepted for `motorcycle` in Route Matrix.
+## 2026-10-18: first live run (free API key)
+
+All four live checks worked on the first try. The agent-written client needed no fixes.
+`traffic=approximated` is accepted for `drive` and `motorcycle`, and phone numbers come through.
+
+| Input | Type / mode | Result | Observation |
+|---|---|---|---|
+| `Mirpur 10, Dhaka` | hospital / drive | 5 results, 2 to 5 min | The closest on the map (a government dispensary) was **not** the fastest to reach. Several "hospitals" are diagnostic centres or an eye hospital: OSM tagging, not a Geoapify bug. |
+| `ধানমন্ডি ২৭` (Bangla) | pharmacy / drive | 3 results, 1 to 2 min | Bangla script with Bangla digits geocoded correctly to the Dhanmondi 27 (new Road 16) junction. |
+| `23.7266, 90.3925` | fire / motorcycle | Lalbagh Fire Station, 8 min | Result #3 is a *mosque inside the Fire Service HQ* tagged as a fire station: data-quality issue. Road distance is 2× the straight line (old Dhaka streets). |
+| `Uttara Sector 7, Dhaka` | police / drive (JSON) | Uttara Thana, 46 s | The sector name geocoded to the nearest highway, not the sector centre: coarse result for informal sector names. |
+
+Ideas for the benchmark:
+- Filter or flag places whose name suggests a non-emergency facility ("Diagnostic", "Eye", "Mosque").
+- Record geocoding precision (`result_type`) for sector or road-number style addresses.
 
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
