@@ -67,6 +67,19 @@ Ideas for the benchmark:
 - Filter or flag places whose name suggests a non-emergency facility ("Diagnostic", "Eye", "Mosque").
 - Record geocoding precision (`result_type`) for sector or road-number style addresses.
 
+## 2026-10-19: benchmark and first recorded agent sessions
+
+- Wrote and ran `benchmark/run.py` (20 locations). Results: [benchmark/results.md](../benchmark/results.md),
+  manual review: [benchmark/NOTES.md](../benchmark/NOTES.md).
+- The benchmark exposed a **silent bug in our own CLI**. When geocoding fell back to the whole city ("Dhanmondi 27,
+  Dhaka" → "Dhaka"), the tool listed hospitals around the city centre without any warning. Fix: read
+  `rank.match_type` and warn on `match_by_city_or_disrict`. A test was added.
+- It also showed that 6 of 16 "fastest hospitals" are diagnostic centres, pharmacies and similar. A name-based flag was added.
+- Recorded two agent sessions in which Claude Code called Geoapify MCP tools itself
+  ([agent/sessions/](../agent/sessions/)). The agent made two mistakes there, which are kept in the transcript:
+  `geometry_scope=steps` without `include_instructions`, and forgetting `traffic` on `calculate_route`, which
+  made route and matrix times disagree. The agent instructions were updated after each one.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

@@ -39,11 +39,19 @@ MAX_CANDIDATES = 10
 _LATLON = re.compile(r"^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$")
 
 
+# Names that OpenStreetMap tags as "hospital" in Dhaka but that rarely have an emergency
+# department (found in the benchmark: diagnostic centres, pharmacies, eye hospitals, ...).
+NOT_ER_HINTS = ("diagnostic", "pharma", "eye", "dental", "hijama", "homeo", "consultation",
+                "physio", "optical", "lab ", "mch-fp")
+
+
 @dataclass
 class Origin:
     lon: float
     lat: float
     label: str
+    # True when the geocoder only matched the city/district, not the place itself.
+    coarse: bool = False
 
 
 @dataclass
@@ -60,6 +68,12 @@ class Facility:
     place_id: str = ""
     area_m2: float = None
     area_source: str = ""
+
+    @property
+    def maybe_not_er(self):
+        """Hospital-tagged place whose name suggests no emergency department."""
+        name = f"{self.name.lower()} "
+        return "healthcare.hospital" in self.categories and any(h in name for h in NOT_ER_HINTS)
 
     @property
     def religion(self):
@@ -110,7 +124,10 @@ def resolve_origin(client, where):
     hit = client.geocode(where)
     if not hit:
         return None
-    return Origin(lon=hit["lon"], lat=hit["lat"], label=hit.get("formatted", where))
+    # e.g. "Dhanmondi 27, Dhaka" -> only "Dhaka" matched (match_type "match_by_city_or_disrict")
+    match_type = (hit.get("rank") or {}).get("match_type", "")
+    coarse = match_type.startswith(("match_by_city", "match_by_country"))
+    return Origin(lon=hit["lon"], lat=hit["lat"], label=hit.get("formatted", where), coarse=coarse)
 
 
 def _phone(props):

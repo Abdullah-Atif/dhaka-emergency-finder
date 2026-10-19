@@ -65,7 +65,8 @@ def main(argv=None):
         return 1
 
     if args.json:
-        out = {"origin": vars(origin), "results": [dict(vars(f), religion=f.religion) for f in ranked]}
+        out = {"origin": vars(origin),
+               "results": [dict(vars(f), religion=f.religion, maybe_not_er=f.maybe_not_er) for f in ranked]}
         if emergency:
             out = {"emergency_number": EMERGENCY_NUMBER, **out}
         print(json.dumps(out, ensure_ascii=False, indent=2))
@@ -73,6 +74,10 @@ def main(argv=None):
         if emergency:
             print(f"!! Emergency? Call {EMERGENCY_NUMBER} first.\n")
         print(f"From: {origin.label}")
+        if origin.coarse:
+            print(f"!! Could not find {args.where!r} exactly; only {origin.label!r} matched.\n"
+                  "   Results are around that centre, not your location.\n"
+                  '   Try a nearby landmark, a different spelling, Bangla script, or "lat,lon".')
         order = "biggest first" if args.sort == "size" else f"by {args.mode} travel time"
         print(f"Nearest {label} ({order}):\n")
         if not ranked:
@@ -82,6 +87,8 @@ def main(argv=None):
             print(f"   {_fmt_min(f.drive_s)} | {_fmt_km(f.drive_m)} by road | {_fmt_km(f.straight_m)} straight line")
             if args.kind == "worship":
                 print(f"   Size: {_fmt_size(f)}")
+            if f.maybe_not_er:
+                print("   Note: the name suggests this may not have an emergency department")
             if f.address:
                 print(f"   {f.address}")
             if f.phone:

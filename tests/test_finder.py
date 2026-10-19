@@ -141,6 +141,25 @@ class FinderTests(unittest.TestCase):
         d = finder.haversine_m(90.4125, 23.7270, 90.3958, 23.7380)
         self.assertTrue(1500 < d < 2300, d)
 
+    def test_city_level_fallback_is_flagged(self):
+        class CityOnly(FakeClient):
+            def geocode(self, text):
+                return {"lon": 90.41, "lat": 23.81, "formatted": "Dhaka, DH, Bangladesh",
+                        "rank": {"match_type": "match_by_city_or_disrict"}}
+        origin, _ = finder.find(CityOnly(), "Dhanmondi 27, Dhaka")
+        self.assertTrue(origin.coarse)
+        origin, _ = finder.find(FakeClient(), "Mirpur 10")
+        self.assertFalse(origin.coarse)
+
+    def test_non_emergency_names_flagged(self):
+        hosp = ["healthcare", "healthcare.hospital"]
+        mk = lambda name, cats=hosp: finder.Facility(name, "", 0, 0, 0, categories=cats)  # noqa: E731
+        self.assertTrue(mk("Al Fateh Diagnostics").maybe_not_er)
+        self.assertTrue(mk("Ahammed Pharma").maybe_not_er)
+        self.assertTrue(mk("Ispahani Islamia Eye Institute and Hospital").maybe_not_er)
+        self.assertFalse(mk("Shahbagh P.G. Hospital").maybe_not_er)
+        self.assertFalse(mk("Ahammed Pharma", ["healthcare", "healthcare.pharmacy"]).maybe_not_er)
+
     def test_polygon_area(self):
         self.assertAlmostEqual(finder.polygon_area_m2(square(90.4, 23.8, 100)), 10000, delta=50)
         self.assertIsNone(finder.polygon_area_m2({"type": "Point", "coordinates": [90.4, 23.8]}))

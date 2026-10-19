@@ -15,7 +15,50 @@ There are two ways to use it:
 
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
-**Status:** work-in-progress prototype (v0.1.0). The CLI works and is unit-tested. The benchmark and tutorial are planned (see [Roadmap](#roadmap)).
+**Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. A first
+20-location benchmark and two recorded agent sessions are done. The tutorial is in progress (see [Roadmap](#roadmap)).
+
+## First results (live Geoapify APIs, 2026-10-19)
+
+From the [20-location Dhaka benchmark](benchmark/results.md) ([manual review](benchmark/NOTES.md)):
+
+| Finding | Result |
+|---|---|
+| The nearest hospital **on the map** was **not** the fastest to reach by car | **10 of 16** locations (up to 6.9 min slower) |
+| The fastest "hospital" is, by its name, a diagnostic centre, pharmacy or eye hospital | **6 of 16**, now flagged by the CLI |
+| Geocoding found the right place | **14 of 20**: English 10 / 16, **Bangla 4 / 4** |
+| Silent fallback to the whole city, visible only in `match_type` (e.g. "Dhanmondi 27, Dhaka") | 3 of 20, now detected and warned by the CLI |
+| `"BUET, Dhaka"` / full English name | wrong place (Gulshan / a company in Banani). **`বুয়েট` in Bangla: correct.** |
+
+Recorded AI-agent sessions with every Geoapify MCP tool call:
+[hospital near Mirpur 10](agent/sessions/01-mirpur-hospital.md) ·
+[mosques and their size, asked in Bangla](agent/sessions/02-mirpur-mosques-bangla.md)
+
+### Sample output
+
+```text
+$ python -m dhaka_emergency "Farmgate, Dhaka" --top 2
+!! Emergency? Call 999 first.
+
+From: Farmgate, Airport Road, Tejgaon, Dhaka - 1215, Bangladesh
+Nearest hospital (by drive travel time):
+
+1. Al Fateh Diagnostics
+   1 min | 0.3 km by road | 0.3 km straight line
+   Note: the name suggests this may not have an emergency department
+   Kazi Nazrul Islam Avenue, Tejgaon, Dhaka - 1215, Bangladesh
+2. Brain and Mind Hospital
+   1 min | 0.5 km by road | 0.3 km straight line
+   Airport Road, Tejgaon, Dhaka - 1215, Bangladesh
+```
+
+```text
+$ python -m dhaka_emergency "Dhanmondi 27, Dhaka"
+From: Dhaka, DH, Bangladesh
+!! Could not find 'Dhanmondi 27, Dhaka' exactly; only 'Dhaka, DH, Bangladesh' matched.
+   Results are around that centre, not your location.
+   Try a nearby landmark, a different spelling, Bangla script, or "lat,lon".
+```
 
 ## Why travel time?
 
@@ -130,7 +173,9 @@ dhaka_emergency/     CLI package (geoapify.py = REST client, finder.py = logic, 
 agent/               agent instructions + MCP setup for AI clients
 prompts/             prompts given to the AI coding agent, with corrections
 docs/ai-log.md       what worked, what needed human guidance
-benchmark/           Dhaka test locations (benchmark runner planned)
+benchmark/           Dhaka test locations, runner (run.py), results and manual review notes
+agent/sessions/      recorded agent sessions: write-up (.md) + full MCP transcript (.jsonl)
+agent/mcp_call.py    call one Geoapify MCP tool over JSON-RPC and log it (for agents without an MCP client)
 tests/               unit tests
 ```
 
@@ -139,7 +184,9 @@ tests/               unit tests
 - The data comes from OpenStreetMap. Some hospitals are missing, have no phone number, or do not mark whether they have an emergency department.
 - `traffic=approximated` is an estimate. It is not live Dhaka traffic.
 - There are no CNG auto-rickshaw or rickshaw travel modes. `motorcycle` is the closest option.
-- Geocoding of very informal or Bangla-script locations can fail. In that case use `lat,lon`.
+- Geocoding of informal English names can fail or land in the wrong place, sometimes still reported as `full_match`
+  (see [benchmark/NOTES.md](benchmark/NOTES.md)). Bangla script often works better. Otherwise use `lat,lon`.
+- The "not an emergency hospital" flag is a name-based heuristic, not verified data.
 - The tool does not know opening hours, bed availability or emergency capacity.
 - Place-of-worship sizes are mapped areas, not capacity. A mapped outline can be a whole compound, and a containing building can be much bigger than the place itself.
 - Landmark geocoding can be wrong: "BUET, Dhaka" matched a building with "BUET" in its name in Gulshan instead of the BUET campus in Palashi.
@@ -150,8 +197,10 @@ tests/               unit tests
 - [x] Agent instructions + MCP setup (Claude Code, VS Code)
 - [x] Places of worship (all religions) with size from Place Details, sorted by travel time or size
 - [ ] Size check: compare mapped areas of well-known places (Baitul Mukarram, Dhakeshwari, Armenian Church, ...) with published figures
-- [ ] Benchmark: about 20 Dhaka locations (English + Bangla). Compare straight-line nearest with travel-time nearest, and measure geocoding success.
-- [ ] Recorded agent sessions with tool-call transcripts
+- [x] Benchmark: 20 Dhaka locations (English + Bangla). Compare straight-line nearest with travel-time nearest, and measure geocoding success (`python benchmark/run.py`).
+- [x] First recorded agent sessions with full MCP tool-call transcripts ([agent/sessions/](agent/sessions/))
+- [ ] More sessions in Claude Desktop and VS Code Copilot, with screenshots
+- [ ] Bigger benchmark (more locations, `motorcycle`, Bangla vs English for the same place)
 - [ ] Tutorial on GitHub Pages + dev.to, with client screenshots
 - [ ] Feedback report for Geoapify OpenAPI / MCP
 

@@ -1,0 +1,29 @@
+From: 23.80706,90.36877
+Nearest mosque (by drive travel time):
+
+1. (unnamed) [islam]
+   1 min | 0.1 km by road | 0.1 km straight line
+   Size: <= 221 m² (containing building)
+   Mirpur, Dhaka - 1216, Bangladesh
+2. Shah Ali Plaza Market Masjid, Mosque [islam]
+   2 min | 0.3 km by road | 0.1 km straight line
+   Size: <= 2,083 m² (containing building)
+   Senpara Parbata, Senpara Porbota, Dhaka - 1216, Bangladesh
+3. Baitur Mamur Jame Masjid [islam]
+   2 min | 0.4 km by road | 0.1 km straight line
+   Size: 444 m² (mapped outline)
+   Folpotti Road, Senpara Porbota, Dhaka - 1216, Bangladesh
+4. Baitul Atik Jame Masjid, Mosque [islam]
+   3 min | 0.4 km by road | 0.3 km straight line
+   Size: <= 357 m² (containing building)
+   Boundary Road, Monipur, Dhaka - 1216, Bangladesh
+5. বাইতুল ফালাহ কুদ্দুস জামে মসজিদ [islam]
+   3 min | 0.5 km by road | 0.4 km straight line
+   Size: 374 m² (mapped outline)
+   block-B Mirpur Road -13, Mirpur, Dhaka - 1216, Bangladesh
+6. Fakir Bari Jame Masjid [islam]
+   3 min | 0.4 km by road | 0.2 km straight line
+   Size: 507 m² (mapped outline)
+   Line 1, Mirpur, Dhaka - 1216, Bangladesh
+
+Note: the closest on the map (Shah Ali Plaza Market Masjid, Mosque) is NOT the fastest to reach.

@@ -1,21 +1,21 @@
-id,query,language,note
-1,"Mirpur 10 Golchattar, Dhaka",en,informal roundabout name
-2,"মিরপুর ১০ গোলচত্বর, ঢাকা",bn,same place in Bangla
-3,"Dhanmondi 27, Dhaka",en,road number as area name
-4,"ধানমন্ডি ২৭",bn,Bangla digits
-5,"Uttara Sector 7, Dhaka",en,sector-based address
-6,"Gulshan 1 Circle, Dhaka",en,circle name
-7,"Farmgate, Dhaka",en,busy junction
-8,"ফার্মগেট",bn,Bangla only
-9,"Motijheel Shapla Chattar, Dhaka",en,commercial area
-10,"Old Dhaka Chawkbazar",en,dense old city
-11,"Mohammadpur Town Hall, Dhaka",en,landmark
-12,"Badda Link Road, Dhaka",en,road name
-13,"Jatrabari Chowrasta, Dhaka",en,informal junction name
-14,"Bashundhara R/A Block D, Dhaka",en,residential block
-15,"Keraniganj, Dhaka",en,across the Buriganga river
-16,"Kamrangirchar, Dhaka",en,river-bounded area
-17,"Banani Road 11, Dhaka",en,road number
-18,"BUET, Dhaka",en,university landmark
-19,"Shahbag, Dhaka",en,hospital cluster nearby
-20,"বসুন্ধরা সিটি",bn,shopping mall landmark in Bangla
+id,query,language,expected_area,note
+1,"Mirpur 10 Golchattar, Dhaka",en,Mirpur|মিরপুর,informal roundabout name
+2,"মিরপুর ১০ গোলচত্বর, ঢাকা",bn,Mirpur|মিরপুর,same place in Bangla
+3,"Dhanmondi 27, Dhaka",en,Dhanmondi|ধানমন্ডি,road number as area name
+4,"ধানমন্ডি ২৭",bn,Dhanmondi|ধানমন্ডি,Bangla digits
+5,"Uttara Sector 7, Dhaka",en,Uttara|উত্তরা,sector-based address
+6,"Gulshan 1 Circle, Dhaka",en,Gulshan|গুলশান,circle name
+7,"Farmgate, Dhaka",en,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,busy junction
+8,"ফার্মগেট",bn,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,Bangla only
+9,"Motijheel Shapla Chattar, Dhaka",en,Motijheel|মতিঝিল,commercial area
+10,"Old Dhaka Chawkbazar",en,Chawkbazar|Chowk Bazar|Chalk Bazar|চকবাজার,dense old city
+11,"Mohammadpur Town Hall, Dhaka",en,Mohammadpur|মোহাম্মদপুর,landmark
+12,"Badda Link Road, Dhaka",en,Badda|বাড্ডা,road name
+13,"Jatrabari Chowrasta, Dhaka",en,Jatrabari|যাত্রাবাড়ী,informal junction name
+14,"Bashundhara R/A Block D, Dhaka",en,Bashundhara|বসুন্ধরা,residential block
+15,"Keraniganj, Dhaka",en,Keraniganj|কেরানীগঞ্জ,across the Buriganga river
+16,"Kamrangirchar, Dhaka",en,Kamrangirchar|কামরাঙ্গীরচর,river-bounded area
+17,"Banani Road 11, Dhaka",en,Banani|বনানী,road number
+18,"BUET, Dhaka",en,Palashi|Lalbagh|Bokshibazar|Bakshibazar|Azimpur|Shahbag|Ramna,university landmark (campus is at Palashi)
+19,"Shahbag, Dhaka",en,Shahbag|Shahbagh|শাহবাগ,hospital cluster nearby
+20,"বসুন্ধরা সিটি",bn,Panthapath|Kathalbagan|Karwan|Kawran|Tejgaon|পান্থপথ,shopping mall landmark (at Panthapath) in Bangla
