@@ -8,13 +8,18 @@ In Dhaka, the hospital that looks closest on a map is often not the one you can 
 canals, rivers and dense traffic change the answer. I wanted to see whether AI tools can answer the question
 people actually have in an emergency, "where can I get to fastest?", and where they get it wrong.
 
-I solved the same task in two ways with [Geoapify](https://www.geoapify.com/):
+I answered the same question in three ways with [Geoapify](https://www.geoapify.com/):
 
-1. **An AI agent** that calls [Geoapify MCP](https://apidocs.geoapify.com/mcp/) tools at run time.
+1. **An AI agent** that calls [Geoapify MCP](https://apidocs.geoapify.com/mcp/) tools at run time (tested in Claude Code and
+   in VS Code + GitHub Copilot).
 2. **A small Python CLI** that an AI coding agent wrote from the [Geoapify OpenAPI specifications](https://apidocs.geoapify.com/open-api/).
+3. **A phone-friendly web app** for people who are not developers: "use my location", tap to call 999, Bangla or English.
 
-Then I tested both on 10 real Dhaka locations, in English and in Bangla.
+Then I tested the pipeline on 10 real Dhaka locations, in English and in Bangla.
 
+![Architecture: three front ends, one four-step Geoapify pipeline](images/architecture.svg)
+
+**Try the app:** <https://abdullah-atif.github.io/dhaka-emergency-finder/app/> ·
 **Code:** <https://github.com/Abdullah-Atif/dhaka-emergency-finder> (MIT)
 
 ---
@@ -211,7 +216,36 @@ named `{lat, lon}` fields.)
 
 ---
 
-## Part 4: What 10 Dhaka locations showed
+## Part 4: A web app for everyone else
+
+A CLI and an AI client are fine for developers, but in an emergency people reach for a phone. So the same pipeline
+also runs as a single static page ([`docs/app/`](https://github.com/Abdullah-Atif/dhaka-emergency-finder/tree/main/docs/app),
+no build step, no server), hosted free on GitHub Pages:
+
+| Bangla, dark mode, hospitals near Mirpur 10 | English, light mode, fire service near Shahbag |
+|---|---|
+| ![Web app in Bangla](images/app-mobile-bangla.jpg) | ![Web app in English](images/app-mobile-english.jpg) |
+
+What it does differently from a plain "nearest hospital" search:
+
+- **A big "tap to call 999" button at the top**, before anything else.
+- **📍 Use my location** starts the search right away, and looks up the street address in parallel.
+- **Results appear in two steps.** The 10 nearest places show by distance after the Places call (1.6 s in one test on a
+  good connection; it depends on the network); they are re-sorted by travel time when the Route Matrix answers, and the route to #1 is drawn on the map.
+- **The same warnings as the CLI:** city-level geocoding fallback, "hospitals" whose name says diagnostic centre or eye
+  hospital, and a new one for places whose name says they are something else. In the Shahbag fire-service search,
+  #2 was *"Mosque of Bangladesh Fire Service & Civil Defence Headquarter"*.
+- **It merges duplicates** ("radda" and "RADDA", 5 m apart, were both in the Places results).
+- **Bangla and English** interface, a **Navigate** button that opens directions in Google Maps, and **tap-to-call** for
+  places that have a phone number in the map data.
+
+The browser calls Geoapify directly. Geoapify answers with `access-control-allow-origin: *`, so a static page is
+enough. The pure logic (ranking, duplicate merging, the warning heuristics) has its own tests:
+`node --test tests/app.test.js`.
+
+---
+
+## Part 5: What 10 Dhaka locations showed
 
 `python benchmark/run.py` geocodes each location, finds up to 10 hospitals, and compares the **nearest on the map**
 with the **fastest to reach**. [Full results](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/results.md) ·
@@ -240,7 +274,7 @@ heuristic, so verify before relying on it.
 
 ---
 
-## Part 5: Feedback for Geoapify
+## Part 6: Feedback for Geoapify
 
 The full list, with evidence for each point, is in [feedback.md](feedback.md). The main suggestions:
 
@@ -255,6 +289,10 @@ The full list, with evidence for each point, is in [feedback.md](feedback.md). T
 ---
 
 ## Try it
+
+**In your browser:** <https://abdullah-atif.github.io/dhaka-emergency-finder/app/>
+
+**From the command line:**
 
 ```bash
 git clone https://github.com/Abdullah-Atif/dhaka-emergency-finder

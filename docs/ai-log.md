@@ -119,6 +119,21 @@ emergency facilities only, and a 10-location benchmark.
   against inline keys. The key must be replaced.
 - VS Code quirk: pressing Start before the first chat message fails with "Send a message first."
 
+## 2026-10-21: web app for the €500 "best app" bonus
+
+- Added `docs/app/`: a single static page (Leaflet + Geoapify REST from the browser) with a tap-to-call 999 button,
+  "use my location", Bangla/English, map + route, and the same warnings as the CLI. Pure helpers tested with
+  `node --test tests/app.test.js`.
+- First live run felt slow: about 13 s before any result. Timing each call once (one sample, home connection in
+  Dhaka): geocode 3.9 s, places 2.3 s, route matrix (`traffic=approximated`) 7.4 s. Changes: one 10 km Places call
+  instead of widening 2 → 5 → 10 km (in Mirpur the 2 km and 10 km calls returned the same 10 places); show the nearest
+  places by distance as soon as Places answers, then re-sort by travel time; with GPS, search first and fetch the
+  address label in parallel. Next run: first results 1.6 s, final ranking 2.1 s (the network was also faster then).
+- Two data problems found while testing, both now handled in the app: duplicate places ("radda" and "RADDA", 5 m
+  apart), and a mosque inside the Fire Service HQ returned as a fire station (`service.fire_station`).
+- Mistake caught before shipping: the "different place" hint list had `quarter`, which would also have flagged
+  "Fire Service & Civil Defence Headquarter". It was removed, and a test covers that case.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

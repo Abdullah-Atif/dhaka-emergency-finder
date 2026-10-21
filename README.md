@@ -10,6 +10,9 @@ There are two ways to use it:
 |---|---|---|
 | **AI agent** | Ask in plain English or Bangla in an MCP client such as Claude Code or VS Code + Copilot (both tested), or Claude Desktop | [Geoapify MCP](https://apidocs.geoapify.com/mcp/) tools |
 | **CLI** | `python -m dhaka_emergency "Mirpur 10"`, built with an AI coding agent from the specs | [Geoapify OpenAPI specs](https://apidocs.geoapify.com/open-api/) → REST APIs |
+| **Web app** | [Open on your phone](https://abdullah-atif.github.io/dhaka-emergency-finder/app/): use my location, tap to call 999, Bangla / English | Geoapify REST APIs from the browser |
+
+![Architecture](docs/images/architecture.svg)
 
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
@@ -136,7 +139,8 @@ You need Python 3.9 or newer. There are no third-party packages.
 ## Tests
 
 ```bash
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests -v      # CLI (Python)
+node --test tests/app.test.js                 # web app helpers (Node 18+)
 ```
 
 The tests use a fake client, so they need no API key or network.
@@ -158,6 +162,7 @@ dhaka_emergency/     CLI package (geoapify.py = REST client, finder.py = logic, 
 agent/               agent instructions + MCP setup for AI clients
 prompts/             prompts given to the AI coding agent, with corrections
 docs/ai-log.md       what worked, what needed human guidance
+docs/app/            web app (static page on GitHub Pages; config.js holds the optional demo key)
 docs/tutorial.md     the tutorial (served by GitHub Pages; docs/devto.md is the dev.to copy)
 docs/feedback.md     feedback for Geoapify OpenAPI specs and MCP tools
 benchmark/           Dhaka test locations, runner (run.py), results and manual review notes

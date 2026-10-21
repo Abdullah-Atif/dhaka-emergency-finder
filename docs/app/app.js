@@ -1,0 +1,375 @@
+/* Dhaka Emergency Finder - web app.
+ * Same pipeline as the Python CLI: geocode -> places -> route matrix -> route.
+ * Pure helpers are exported for Node tests (tests/app.test.js); the UI runs only in a browser.
+ */
+(function () {
+  "use strict";
+
+  var DHAKA = { lat: 23.8103, lon: 90.4125 };
+  var SEARCH_RADIUS = 10000;
+  var MAX_CANDIDATES = 10;
+  var CATEGORIES = {
+    hospital: "healthcare.hospital",
+    pharmacy: "healthcare.pharmacy",
+    clinic: "healthcare.clinic_or_praxis",
+    police: "service.police",
+    fire: "service.fire_station",
+    ambulance: "emergency.ambulance_station",
+  };
+  // Hospital-tagged names that rarely have an emergency department (found in the benchmark).
+  var NOT_ER_HINTS = ["diagnostic", "pharma", "eye", "dental", "hijama", "homeo", "consultation",
+                      "physio", "optical", "lab ", "mch-fp"];
+
+  function haversineM(lat1, lon1, lat2, lon2) {
+    var r = 6371000, rad = Math.PI / 180;
+    var dp = (lat2 - lat1) * rad, dl = (lon2 - lon1) * rad;
+    var a = Math.pow(Math.sin(dp / 2), 2) +
+      Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.pow(Math.sin(dl / 2), 2);
+    return 2 * r * Math.asin(Math.sqrt(a));
+  }
+
+  function maybeNotER(name, categories) {
+    var n = (name || "").toLowerCase() + " ";
+    return (categories || []).indexOf("healthcare.hospital") >= 0 &&
+      NOT_ER_HINTS.some(function (h) { return n.indexOf(h) >= 0; });
+  }
+
+  // Places whose name says they are something else (seen: a mosque inside the Fire Service HQ tagged as a fire station).
+  var OTHER_PLACE_HINTS = ["mosque", "masjid", "মসজিদ", "school", "canteen"];
+  function maybeOtherPlace(name) {
+    var n = (name || "").toLowerCase();
+    return OTHER_PLACE_HINTS.some(function (h) { return n.indexOf(h) >= 0; });
+  }
+
+  // "Dhanmondi 27, Dhaka" -> only "Dhaka" matched. Note the API's spelling: "disrict".
+  function isCoarse(geocodeResult) {
+    var mt = ((geocodeResult && geocodeResult.rank) || {}).match_type || "";
+    return mt.indexOf("match_by_city") === 0 || mt.indexOf("match_by_country") === 0;
+  }
+
+  // Rank candidates (with .time in seconds or null) fastest first; unreachable last.
+  function rankByTime(items) {
+    return items.slice().sort(function (a, b) {
+      if (a.time == null) return b.time == null ? 0 : 1;
+      if (b.time == null) return -1;
+      return a.time - b.time;
+    });
+  }
+
+  // OpenStreetMap often has the same place twice ("radda" and "RADDA", 5 m apart). Keep the first.
+  function dedupe(items, meters) {
+    var out = [];
+    items.forEach(function (f) {
+      var key = (f.name || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, "");
+      var dup = out.some(function (g) {
+        var gk = (g.name || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, "");
+        return key && key === gk && haversineM(f.lat, f.lon, g.lat, g.lon) < (meters || 30);
+      });
+      if (!dup) out.push(f);
+    });
+    return out;
+  }
+
+  var helpers = { haversineM: haversineM, maybeNotER: maybeNotER, isCoarse: isCoarse,
+                  rankByTime: rankByTime, dedupe: dedupe, maybeOtherPlace: maybeOtherPlace, CATEGORIES: CATEGORIES };
+  if (typeof module !== "undefined" && module.exports) { module.exports = helpers; return; }
+
+  // ---------------------------------------------------------------- browser UI
+
+  var T = {
+    en: {
+      call: "Emergency? Tap to call 999", where: "Where are you?", placeholder: "e.g. Mirpur 10, ধানমন্ডি ২৭, or lat,lon",
+      myloc: "Use my location", find: "Find fastest", what: "What do you need?", how: "How are you travelling?",
+      hospital: "Hospital", pharmacy: "Pharmacy", clinic: "Clinic", police: "Police", fire: "Fire service", ambulance: "Ambulance",
+      drive: "Car", motorcycle: "Motorcycle", walk: "Walk",
+      searching: "Searching…", ranking: "Nearest by distance. Checking travel times…", locating: "Getting your location…", nothing: "Nothing found within 10 km.",
+      notfound: "Could not find that place. Try a nearby landmark, Bangla script, or lat,lon.",
+      coarse: "Could not find that exact place; only “{x}” matched. Results are around its centre, not your location. Try a nearby landmark or Bangla script.",
+      from: "From", min: "min", byroad: "by road", straight: "straight line", noroute: "no route",
+      noter: "Name suggests it may not have an emergency department",
+      other: "Name suggests this may be a different place (e.g. a mosque inside the compound), not the service itself",
+      notfastest: "The closest on the map ({x}) is not the fastest to reach.",
+      callbtn: "Call", navigate: "Navigate", route: "Show route",
+      keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
+      keysave: "Save key", geoerr: "Could not get your location. Type it instead.",
+      disclaimer: "Map data may be incomplete. A place may be closed or have no emergency department. Times are estimates with approximate traffic.",
+      lang: "বাংলা",
+    },
+    bn: {
+      call: "জরুরি অবস্থা? ৯৯৯-এ কল করতে চাপুন", where: "আপনি কোথায় আছেন?", placeholder: "যেমন: মিরপুর ১০, ধানমন্ডি ২৭, বা lat,lon",
+      myloc: "আমার অবস্থান", find: "দ্রুততম খুঁজুন", what: "কী দরকার?", how: "কীভাবে যাবেন?",
+      hospital: "হাসপাতাল", pharmacy: "ফার্মেসি", clinic: "ক্লিনিক", police: "পুলিশ", fire: "ফায়ার সার্ভিস", ambulance: "অ্যাম্বুলেন্স",
+      drive: "গাড়ি", motorcycle: "মোটরসাইকেল", walk: "হেঁটে",
+      searching: "খোঁজা হচ্ছে…", ranking: "দূরত্ব অনুযায়ী কাছেরগুলো। যাতায়াতের সময় হিসাব করা হচ্ছে…", locating: "আপনার অবস্থান নেওয়া হচ্ছে…", nothing: "১০ কিমির মধ্যে কিছু পাওয়া যায়নি।",
+      notfound: "জায়গাটা পাওয়া যায়নি। কাছের কোনো পরিচিত জায়গা, বাংলায়, বা lat,lon লিখে চেষ্টা করুন।",
+      coarse: "ঠিক জায়গাটা পাওয়া যায়নি, শুধু “{x}” মিলেছে। ফলাফল সেটার কেন্দ্রের আশেপাশের, আপনার অবস্থানের নয়। কাছের পরিচিত জায়গা বা বাংলায় লিখে চেষ্টা করুন।",
+      from: "যেখান থেকে", min: "মিনিট", byroad: "রাস্তায়", straight: "সোজাসুজি", noroute: "রাস্তা নেই",
+      noter: "নাম দেখে মনে হচ্ছে এখানে জরুরি বিভাগ না-ও থাকতে পারে",
+      other: "নাম দেখে মনে হচ্ছে এটা অন্য কোনো জায়গা (যেমন প্রাঙ্গণের ভেতরের মসজিদ), সেবাকেন্দ্রটি নিজে নয়",
+      notfastest: "ম্যাপে সবচেয়ে কাছেরটি ({x}) সবচেয়ে তাড়াতাড়ি পৌঁছানোর নয়।",
+      callbtn: "কল", navigate: "নেভিগেট", route: "রাস্তা দেখুন",
+      keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
+      keysave: "Key সেভ করুন", geoerr: "অবস্থান পাওয়া যায়নি। হাতে লিখে দিন।",
+      disclaimer: "ম্যাপের তথ্য অসম্পূর্ণ হতে পারে। কোনো জায়গা বন্ধ থাকতে পারে বা সেখানে জরুরি বিভাগ না-ও থাকতে পারে। সময় আনুমানিক, যানজট ধরে।",
+      lang: "English",
+    },
+  };
+
+  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false };
+  var map, markerLayer;
+  var $ = function (id) { return document.getElementById(id); };
+  function t(k) { return T[state.lang][k]; }
+
+  function apiKey() {
+    var cfg = (window.DEF_CONFIG || {}).apiKey;
+    if (cfg) return cfg;
+    try { return localStorage.getItem("geoapifyKey") || ""; } catch (e) { return ""; }
+  }
+
+  function getJSON(url, body) {
+    var sep = url.indexOf("?") >= 0 ? "&" : "?";
+    var opts = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+    return fetch(url + sep + "apiKey=" + encodeURIComponent(apiKey()), opts).then(function (r) {
+      if (!r.ok) throw new Error("Geoapify HTTP " + r.status);
+      return r.json();
+    });
+  }
+
+  function geocode(text) {
+    var m = text.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (m) return Promise.resolve({ lat: +m[1], lon: +m[2], label: m[1] + ", " + m[2], coarse: false });
+    var q = "https://api.geoapify.com/v1/geocode/search?format=json&limit=1&lang=en&filter=countrycode:bd" +
+      "&bias=proximity:" + DHAKA.lon + "," + DHAKA.lat + "&text=" + encodeURIComponent(text);
+    return getJSON(q).then(function (d) {
+      var h = (d.results || [])[0];
+      return h ? { lat: h.lat, lon: h.lon, label: h.formatted, coarse: isCoarse(h) } : null;
+    });
+  }
+
+  function reverse(lat, lon) {
+    return getJSON("https://api.geoapify.com/v1/geocode/reverse?format=json&lang=en&lat=" + lat + "&lon=" + lon)
+      .then(function (d) { var h = (d.results || [])[0]; return h ? h.formatted : lat.toFixed(5) + ", " + lon.toFixed(5); })
+      .catch(function () { return lat.toFixed(5) + ", " + lon.toFixed(5); });
+  }
+
+  function findCandidates(origin, kind) {
+    // One request: the 10 nearest places within 10 km (bias=proximity sorts nearest first).
+    var q = "https://api.geoapify.com/v2/places?lang=en&limit=" + MAX_CANDIDATES + "&categories=" + CATEGORIES[kind] +
+      "&filter=circle:" + origin.lon + "," + origin.lat + "," + SEARCH_RADIUS + "&bias=proximity:" + origin.lon + "," + origin.lat;
+    return getJSON(q).then(function (d) { return d.features || []; }).then(function (features) {
+      return dedupe(features.map(function (ft) {
+        var p = ft.properties || {};
+        var raw = (p.datasource || {}).raw || {};
+        return {
+          name: p.name || "(unnamed)", address: p.address_line2 || p.formatted || "",
+          lat: p.lat, lon: p.lon, categories: p.categories || [],
+          phone: (p.contact || {}).phone || raw.phone || raw["contact:phone"] || "",
+          straight: haversineM(origin.lat, origin.lon, p.lat, p.lon), time: null, dist: null,
+        };
+      }));
+    });
+  }
+
+  function rank(origin, items, mode) {
+    if (!items.length) return Promise.resolve([]);
+    var body = {
+      mode: mode, sources: [{ location: [origin.lon, origin.lat] }],
+      targets: items.map(function (f) { return { location: [f.lon, f.lat] }; }),
+    };
+    if (mode !== "walk") body.traffic = "approximated";
+    return getJSON("https://api.geoapify.com/v1/routematrix", body).then(function (d) {
+      (d.sources_to_targets[0] || []).forEach(function (c) {
+        if (c.time != null) { items[c.target_index].time = c.time; items[c.target_index].dist = c.distance; }
+      });
+      return rankByTime(items);
+    });
+  }
+
+  function route(origin, dest, mode) {
+    // Routing waypoints are lat,lon (unlike Places and Route Matrix, which use lon,lat).
+    var q = "https://api.geoapify.com/v1/routing?format=geojson&mode=" + mode +
+      (mode !== "walk" ? "&traffic=approximated" : "") +
+      "&waypoints=" + origin.lat + "," + origin.lon + "|" + dest.lat + "," + dest.lon;
+    return getJSON(q).then(function (d) { return (d.features || [])[0] || null; });
+  }
+
+  // ---------------------------------------------------------------- rendering
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function fmtMin(s) {
+    if (s == null) return state.pending ? "…" : t("noroute");
+    return Math.max(1, Math.round(s / 60)) + " " + t("min");
+  }
+  function fmtKm(m) { return m == null ? "–" : (m / 1000).toFixed(1) + " km"; }
+
+  function setStatus(html, kind) {
+    var el = $("status");
+    el.className = "status" + (kind ? " " + kind : "");
+    el.innerHTML = html || "";
+    el.hidden = !html;
+  }
+
+  function renderText() {
+    document.documentElement.lang = state.lang === "bn" ? "bn" : "en";
+    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t(el.getAttribute("data-t")); });
+    $("where-input").placeholder = t("placeholder");
+    if (state.results.length) renderResults();
+  }
+
+  function renderResults() {
+    var o = state.origin, list = $("results");
+    var html = '<p class="from">' + esc(t("from")) + ": " + esc(o.label) + "</p>";
+    if (state.pending) html += '<p class="note">⏳ ' + esc(t("ranking")) + "</p>";
+    if (!state.results.length) html += '<p class="muted">' + esc(t("nothing")) + "</p>";
+    state.results.slice(0, 5).forEach(function (f, i) {
+      var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
+      var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
+        f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
+      html += '<article class="card' + (i === 0 ? " best" : "") + '">' +
+        '<div class="row"><span class="rank">' + (i + 1) + '</span><h3>' + esc(f.name) + "</h3>" +
+        '<span class="time">' + esc(fmtMin(f.time)) + "</span></div>" +
+        '<p class="meta">' + esc(fmtKm(f.dist)) + " " + esc(t("byroad")) + " · " + esc(fmtKm(f.straight)) + " " + esc(t("straight")) + "</p>" +
+        (f.address ? '<p class="addr">' + esc(f.address) + "</p>" : "") +
+        (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" :
+          maybeNotER(f.name, f.categories) ? '<p class="warn">⚠ ' + esc(t("noter")) + "</p>" : "") +
+        (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
+        '<div class="actions"><button class="btn small" data-route="' + i + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div></article>";
+    });
+    var reach = state.results.filter(function (f) { return f.time != null; });
+    if (!state.pending && reach.length > 1) {
+      var nearest = reach.reduce(function (a, b) { return a.straight <= b.straight ? a : b; });
+      if (nearest !== reach[0]) html += '<p class="note">ℹ ' + esc(t("notfastest").replace("{x}", nearest.name)) + "</p>";
+    }
+    html += '<p class="muted small">' + esc(t("disclaimer")) + "</p>";
+    list.innerHTML = html;
+    list.querySelectorAll("[data-route]").forEach(function (b) {
+      b.addEventListener("click", function () { showRoute(+b.getAttribute("data-route")); });
+    });
+  }
+
+  function drawMap() {
+    var o = state.origin;
+    markerLayer.clearLayers();
+    var bounds = [[o.lat, o.lon]];
+    L.circleMarker([o.lat, o.lon], { radius: 9, color: "#1565c0", fillOpacity: 0.9 }).addTo(markerLayer);
+    state.results.slice(0, 5).forEach(function (f, i) {
+      bounds.push([f.lat, f.lon]);
+      L.marker([f.lat, f.lon], {
+        icon: L.divIcon({ className: "pin" + (i === 0 ? " best" : ""), html: String(i + 1), iconSize: [26, 26] }),
+      }).addTo(markerLayer).bindPopup("<b>" + esc(f.name) + "</b><br>" + esc(fmtMin(f.time)));
+    });
+    map.invalidateSize();
+    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17, animate: false });
+  }
+
+  function showRoute(i) {
+    var f = state.results[i];
+    if (!f || f.time == null) return;
+    route(state.origin, f, state.mode).then(function (feat) {
+      if (state.routeLayer) map.removeLayer(state.routeLayer);
+      if (!feat) return;
+      state.routeLayer = L.geoJSON(feat, { style: { color: "#b00020", weight: 5 } }).addTo(map);
+      var b = state.routeLayer.getBounds().extend([state.origin.lat, state.origin.lon]);
+      state.results.slice(0, 5).forEach(function (r) { b.extend([r.lat, r.lon]); });
+      map.fitBounds(b, { padding: [30, 30], maxZoom: 17, animate: false });
+      $("map").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }).catch(function () {});
+  }
+
+  function run(originPromise) {
+    if (!apiKey()) { $("keybox").hidden = false; return; }
+    setStatus(esc(t("searching")));
+    $("results").innerHTML = "";
+    var mode = state.mode, kind = state.kind;
+    originPromise.then(function (origin) {
+      if (!origin) { setStatus(esc(t("notfound")), "error"); return null; }
+      state.origin = origin;
+      if (origin.coarse) setStatus("⚠ " + esc(t("coarse").replace("{x}", origin.label)), "error");
+      else setStatus("");
+      return findCandidates(origin, kind).then(function (items) {
+        // Show the nearest places at once; re-sort when travel times arrive.
+        state.results = items.slice().sort(function (a, b) { return a.straight - b.straight; });
+        state.pending = true;
+        if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
+        $("map").hidden = false;
+        renderResults();
+        drawMap();
+        return rank(origin, items, mode);
+      });
+    }).then(function (ranked) {
+      state.pending = false;
+      if (!ranked) return;
+      state.results = ranked;
+      if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
+      $("map").hidden = false;
+      renderResults();
+      drawMap();
+      if (ranked.length && ranked[0].time != null) showRoute(0);
+    }).catch(function (e) {
+      state.pending = false;
+      setStatus(esc(String(e.message || e)), "error");
+    });
+  }
+
+  function init() {
+    try { if ((localStorage.getItem("lang") || "") === "bn") state.lang = "bn"; } catch (e) {}
+    map = L.map("map", { zoomControl: true });
+    L.tileLayer("https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=" + encodeURIComponent(apiKey()), {
+      maxZoom: 20,
+      attribution: 'Powered by <a href="https://www.geoapify.com/">Geoapify</a> | &copy; OpenStreetMap contributors',
+    }).addTo(map);
+    map.setView([DHAKA.lat, DHAKA.lon], 12);
+    markerLayer = L.layerGroup().addTo(map);
+
+    document.querySelectorAll("[data-kind]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.kind = b.getAttribute("data-kind");
+        document.querySelectorAll("[data-kind]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+      });
+    });
+    document.querySelectorAll("[data-mode]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.mode = b.getAttribute("data-mode");
+        document.querySelectorAll("[data-mode]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+      });
+    });
+    $("search").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var text = $("where-input").value.trim();
+      if (text) run(geocode(text));
+    });
+    $("myloc").addEventListener("click", function () {
+      if (!navigator.geolocation) { setStatus(esc(t("geoerr")), "error"); return; }
+      setStatus(esc(t("locating")));
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var lat = pos.coords.latitude, lon = pos.coords.longitude;
+        var origin = { lat: lat, lon: lon, label: lat.toFixed(5) + ", " + lon.toFixed(5), coarse: false };
+        run(Promise.resolve(origin));
+        reverse(lat, lon).then(function (label) {
+          origin.label = label;
+          if (state.origin === origin && state.results.length) renderResults();
+        });
+      }, function () { setStatus(esc(t("geoerr")), "error"); }, { enableHighAccuracy: true, timeout: 15000 });
+    });
+    $("lang").addEventListener("click", function () {
+      state.lang = state.lang === "en" ? "bn" : "en";
+      try { localStorage.setItem("lang", state.lang); } catch (e) {}
+      renderText();
+    });
+    $("keyform").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var k = $("keyinput").value.trim();
+      if (!k) return;
+      try { localStorage.setItem("geoapifyKey", k); } catch (err) {}
+      location.reload();
+    });
+    if (!apiKey()) $("keybox").hidden = false;
+    renderText();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();

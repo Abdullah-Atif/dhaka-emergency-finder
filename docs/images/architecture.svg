@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="960" height="540" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5d6670"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="40" text-anchor="middle" font-size="24" font-weight="700" fill="#16191d">Dhaka Emergency Finder: one question, three front ends</text>
+  <text x="480" y="66" text-anchor="middle" font-size="15" fill="#5d6670">"Where can I get to fastest?" is always answered by the same four Geoapify steps</text>
+
+  <!-- Front ends -->
+  <g font-size="15">
+    <rect x="30" y="100" width="250" height="96" rx="12" fill="#e8f1fb" stroke="#1565c0" stroke-width="2"/>
+    <text x="155" y="132" text-anchor="middle" font-weight="700" fill="#0d3c74">Web app (phone)</text>
+    <text x="155" y="156" text-anchor="middle" fill="#16191d">GitHub Pages · Bangla / English</text>
+    <text x="155" y="178" text-anchor="middle" fill="#16191d">"Use my location" · tap to call 999</text>
+
+    <rect x="30" y="222" width="250" height="96" rx="12" fill="#e8f1fb" stroke="#1565c0" stroke-width="2"/>
+    <text x="155" y="254" text-anchor="middle" font-weight="700" fill="#0d3c74">Python CLI</text>
+    <text x="155" y="278" text-anchor="middle" fill="#16191d">written by an AI coding agent</text>
+    <text x="155" y="300" text-anchor="middle" fill="#16191d">from the OpenAPI specs · benchmark</text>
+
+    <rect x="30" y="344" width="250" height="96" rx="12" fill="#fdecef" stroke="#b00020" stroke-width="2"/>
+    <text x="155" y="376" text-anchor="middle" font-weight="700" fill="#7a0016">AI agent (MCP)</text>
+    <text x="155" y="400" text-anchor="middle" fill="#16191d">Claude Code · VS Code + Copilot</text>
+    <text x="155" y="422" text-anchor="middle" fill="#16191d">calls Geoapify MCP tools itself</text>
+  </g>
+
+  <!-- arrows to pipeline -->
+  <path d="M280,148 L360,250" stroke="#5d6670" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M280,270 L360,270" stroke="#5d6670" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M280,392 L360,290" stroke="#5d6670" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="300" y="196" font-size="12" fill="#5d6670">REST</text>
+  <text x="300" y="262" font-size="12" fill="#5d6670">REST</text>
+  <text x="296" y="362" font-size="12" fill="#5d6670">MCP</text>
+
+  <!-- Pipeline -->
+  <rect x="362" y="96" width="330" height="350" rx="14" fill="#f6f7f9" stroke="#dfe3e8" stroke-width="2"/>
+  <text x="527" y="124" text-anchor="middle" font-size="16" font-weight="700" fill="#16191d">Geoapify</text>
+  <g font-size="14">
+    <rect x="382" y="140" width="290" height="58" rx="10" fill="#ffffff" stroke="#9fb3c8"/>
+    <text x="398" y="164" font-weight="700" fill="#16191d">1. Where am I?</text>
+    <text x="398" y="186" fill="#5d6670">Geocoding · geocode_address</text>
+
+    <rect x="382" y="212" width="290" height="58" rx="10" fill="#ffffff" stroke="#9fb3c8"/>
+    <text x="398" y="236" font-weight="700" fill="#16191d">2. What is nearby?</text>
+    <text x="398" y="258" fill="#5d6670">Places · search_places (10 nearest)</text>
+
+    <rect x="382" y="284" width="290" height="58" rx="10" fill="#fff4e5" stroke="#d48806" stroke-width="2"/>
+    <text x="398" y="308" font-weight="700" fill="#16191d">3. What can I reach fastest?</text>
+    <text x="398" y="330" fill="#5d6670">Route Matrix · traffic=approximated</text>
+
+    <rect x="382" y="356" width="290" height="58" rx="10" fill="#ffffff" stroke="#9fb3c8"/>
+    <text x="398" y="380" font-weight="700" fill="#16191d">4. How do I get there?</text>
+    <text x="398" y="402" fill="#5d6670">Routing · calculate_route</text>
+  </g>
+  <path d="M527,198 L527,212" stroke="#5d6670" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M527,270 L527,284" stroke="#5d6670" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M527,342 L527,356" stroke="#5d6670" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output -->
+  <path d="M692,270 L752,270" stroke="#5d6670" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <rect x="754" y="150" width="180" height="240" rx="12" fill="#eaf7ee" stroke="#2e7d32" stroke-width="2"/>
+  <g font-size="14" fill="#16191d">
+    <text x="844" y="182" text-anchor="middle" font-weight="700" fill="#1b5e20">Answer</text>
+    <text x="772" y="214">• Call 999 first</text>
+    <text x="772" y="240">• Fastest 3–5 places</text>
+    <text x="772" y="266">• Map + route</text>
+    <text x="772" y="292">• Warnings:</text>
+    <text x="786" y="314" font-size="13" fill="#5d6670">city-only match,</text>
+    <text x="786" y="334" font-size="13" fill="#5d6670">"hospital" that is a</text>
+    <text x="786" y="354" font-size="13" fill="#5d6670">diagnostic centre</text>
+  </g>
+
+  <text x="480" y="500" text-anchor="middle" font-size="14" fill="#5d6670">Benchmark (10 Dhaka locations): the nearest hospital on the map was not the fastest by car in 8 of 9.</text>
+  <text x="480" y="522" text-anchor="middle" font-size="12" fill="#8a949e">Data © OpenStreetMap contributors · Powered by Geoapify</text>
+</svg>

@@ -6,3 +6,4 @@ __pycache__/
 # Generated maps contain the API key
 *.html
 !docs/**/*.html
+docs/app/config.local.js
