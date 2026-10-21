@@ -4,6 +4,8 @@ import math
 import re
 from dataclasses import dataclass, field
 
+from .classify import classify
+
 EMERGENCY_NUMBER = "999"  # Bangladesh national emergency service
 
 CATEGORIES = {
@@ -20,12 +22,6 @@ RADII = (2000, 5000, 10000)
 MAX_CANDIDATES = 10
 
 _LATLON = re.compile(r"^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$")
-
-
-# Names that OpenStreetMap tags as "hospital" in Dhaka but that rarely have an emergency
-# department (found in the benchmark: diagnostic centres, pharmacies, eye hospitals, ...).
-NOT_ER_HINTS = ("diagnostic", "pharma", "eye", "dental", "hijama", "homeo", "consultation",
-                "physio", "optical", "lab ", "mch-fp")
 
 
 @dataclass
@@ -48,12 +44,14 @@ class Facility:
     drive_m: float = None
     drive_s: float = None
     categories: list = field(default_factory=list)
+    # classify.py result for hospitals and clinics: ed = confirmed / yes / likely / specialised / unknown / no
+    cls: dict = None
+    opening_hours: str = ""
 
     @property
     def maybe_not_er(self):
-        """Hospital-tagged place whose name suggests no emergency department."""
-        name = f"{self.name.lower()} "
-        return "healthcare.hospital" in self.categories and any(h in name for h in NOT_ER_HINTS)
+        """Not a general emergency hospital: a non-hospital, or one speciality only (see classify.py)."""
+        return bool(self.cls) and self.cls["ed"] in ("no", "specialised")
 
 
 def haversine_m(lon1, lat1, lon2, lat2):
@@ -119,6 +117,13 @@ def _phone(props):
 
 def _to_facility(feature, origin):
     p = feature.get("properties", {})
+    raw = (p.get("datasource") or {}).get("raw") or {}
+    cats = p.get("categories", [])
+    cls = None
+    if "healthcare.hospital" in cats or "healthcare.clinic_or_praxis" in cats:
+        cls = classify({"name": p.get("name"), "nameEn": raw.get("name:en"), "nameBn": raw.get("name:bn"),
+                        "tags": {k: raw.get(k) for k in ("emergency", "healthcare", "healthcare:speciality",
+                                                         "operator:type") if raw.get(k)}})
     lon, lat = p.get("lon"), p.get("lat")
     if lon is None or lat is None:
         lon, lat = feature["geometry"]["coordinates"][:2]
@@ -131,7 +136,9 @@ def _to_facility(feature, origin):
         lat=lat,
         straight_m=haversine_m(origin.lon, origin.lat, lon, lat),
         phone=_phone(p),
-        categories=p.get("categories", []),
+        categories=cats,
+        cls=cls,
+        opening_hours=str(raw.get("opening_hours") or ""),
     )
 
 
@@ -160,7 +167,10 @@ def rank_by_travel_time(client, origin, facilities, mode="drive"):
     reachable = [f for f in facilities if f.drive_s is not None]
     unreachable = [f for f in facilities if f.drive_s is None]
     reachable.sort(key=lambda f: f.drive_s)
-    return reachable + unreachable
+    ranked = reachable + unreachable
+    # Keep the travel-time order, but move places classified as "not an emergency facility" to the end.
+    return [f for f in ranked if not (f.cls and f.cls["ed"] == "no")] + \
+        [f for f in ranked if f.cls and f.cls["ed"] == "no"]
 
 
 def find(client, where, kind="hospital", mode="drive", top=5):

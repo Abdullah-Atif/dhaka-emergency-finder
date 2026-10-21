@@ -7,6 +7,7 @@
 
   var DHAKA = { lat: 23.8103, lon: 90.4125 };
   var SEARCH_RADIUS = 10000;
+  var RULES_VERSION = "20261022d";
   var MAX_CANDIDATES = 10;
   var CATEGORIES = {
     hospital: "healthcare.hospital",
@@ -16,9 +17,6 @@
     fire: "service.fire_station",
     ambulance: "emergency.ambulance_station",
   };
-  // Hospital-tagged names that rarely have an emergency department (found in the benchmark).
-  var NOT_ER_HINTS = ["diagnostic", "pharma", "eye", "dental", "hijama", "homeo", "consultation",
-                      "physio", "optical", "lab ", "mch-fp"];
 
   function haversineM(lat1, lon1, lat2, lon2) {
     var r = 6371000, rad = Math.PI / 180;
@@ -26,12 +24,6 @@
     var a = Math.pow(Math.sin(dp / 2), 2) +
       Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.pow(Math.sin(dl / 2), 2);
     return 2 * r * Math.asin(Math.sqrt(a));
-  }
-
-  function maybeNotER(name, categories) {
-    var n = (name || "").toLowerCase() + " ";
-    return (categories || []).indexOf("healthcare.hospital") >= 0 &&
-      NOT_ER_HINTS.some(function (h) { return n.indexOf(h) >= 0; });
   }
 
   // Places whose name says they are something else (seen: a mosque inside the Fire Service HQ tagged as a fire station).
@@ -90,7 +82,14 @@
   function isBangla(text) { return /[\u0980-\u09ff]/.test(text || ""); }
   function isLatLon(text) { return /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(text || ""); }
 
-  var helpers = { isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, maybeNotER: maybeNotER, isCoarse: isCoarse,
+  // Keep the travel-time order, but move places classified as "not an emergency facility" to the end.
+  function demoteNonEmergency(items) {
+    var ok = [], no = [];
+    items.forEach(function (f) { (f.cls && f.cls.ed === "no" ? no : ok).push(f); });
+    return ok.concat(no);
+  }
+
+  var helpers = { demoteNonEmergency: demoteNonEmergency, isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, isCoarse: isCoarse,
                   rankByTime: rankByTime, dedupe: dedupe, maybeOtherPlace: maybeOtherPlace, CATEGORIES: CATEGORIES };
   if (typeof module !== "undefined" && module.exports) { module.exports = helpers; return; }
 
@@ -106,10 +105,18 @@
       notfound: "Could not find that place. Try a nearby landmark, Bangla script, or lat,lon.",
       coarse: "Could not find that exact place; only “{x}” matched. Results are around its centre, not your location. Try a nearby landmark or Bangla script.",
       from: "From", min: "min", byroad: "by road", straight: "straight line", noroute: "no route",
-      noter: "Name suggests it may not have an emergency department",
       other: "Name suggests this may be a different place (e.g. a mosque inside the compound), not the service itself",
       unnamedwarn: "No name in the map data: it may be a small clinic or office. Check before going.",
       showall: "Show all {n} places", showless: "Show top 5",
+      cls_confirmed: "24-hour emergency department (confirmed by a source)",
+      cls_confirmed_spec: "24-hour emergency for {x} (confirmed by a source)",
+      cls_yes: "Government hospital: 24-hour emergency department expected",
+      cls_likely: "Hospital: emergency department not verified",
+      cls_spec: "Specialised: {x}",
+      cls_unknown: "Emergency department: unknown",
+      cls_no: "Not an emergency hospital: {x}",
+      cls_no_map: "Map data says: no emergency department",
+      open247: "Open 24/7 (map data)", source: "source",
       notfastest: "The closest on the map ({x}) is not the fastest to reach.",
       callbtn: "Call", navigate: "Navigate", route: "Show route",
       keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
@@ -126,10 +133,18 @@
       notfound: "জায়গাটা পাওয়া যায়নি। কাছের কোনো পরিচিত জায়গা, বাংলায়, বা lat,lon লিখে চেষ্টা করুন।",
       coarse: "ঠিক জায়গাটা পাওয়া যায়নি, শুধু “{x}” মিলেছে। ফলাফল সেটার কেন্দ্রের আশেপাশের, আপনার অবস্থানের নয়। কাছের পরিচিত জায়গা বা বাংলায় লিখে চেষ্টা করুন।",
       from: "যেখান থেকে", min: "মিনিট", byroad: "রাস্তায়", straight: "সোজাসুজি", noroute: "রাস্তা নেই",
-      noter: "নাম দেখে মনে হচ্ছে এখানে জরুরি বিভাগ না-ও থাকতে পারে",
       other: "নাম দেখে মনে হচ্ছে এটা অন্য কোনো জায়গা (যেমন প্রাঙ্গণের ভেতরের মসজিদ), সেবাকেন্দ্রটি নিজে নয়",
       unnamedwarn: "ম্যাপে এর কোনো নাম নেই: এটা ছোট ক্লিনিক বা অফিস হতে পারে। যাওয়ার আগে নিশ্চিত হয়ে নিন।",
       showall: "সব {n}টি জায়গা দেখুন", showless: "শুধু প্রথম ৫টি দেখুন",
+      cls_confirmed: "২৪ ঘণ্টা জরুরি বিভাগ (সূত্রে নিশ্চিত)",
+      cls_confirmed_spec: "২৪ ঘণ্টা জরুরি বিভাগ: {x} (সূত্রে নিশ্চিত)",
+      cls_yes: "সরকারি হাসপাতাল: ২৪ ঘণ্টা জরুরি বিভাগ থাকার কথা",
+      cls_likely: "হাসপাতাল: জরুরি বিভাগ যাচাই করা হয়নি",
+      cls_spec: "বিশেষায়িত: {x}",
+      cls_unknown: "জরুরি বিভাগ: অজানা",
+      cls_no: "জরুরি হাসপাতাল নয়: {x}",
+      cls_no_map: "ম্যাপের তথ্য অনুযায়ী জরুরি বিভাগ নেই",
+      open247: "২৪/৭ খোলা (ম্যাপের তথ্য)", source: "সূত্র",
       notfastest: "ম্যাপে সবচেয়ে কাছেরটি ({x}) সবচেয়ে তাড়াতাড়ি পৌঁছানোর নয়।",
       callbtn: "কল", navigate: "নেভিগেট", route: "রাস্তা দেখুন",
       keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
@@ -139,7 +154,7 @@
     },
   };
 
-  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false };
+  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false, rules: null };
   var map, markerLayer;
   var $ = function (id) { return document.getElementById(id); };
   function t(k) { return T[state.lang][k]; }
@@ -208,6 +223,12 @@
           lat: p.lat, lon: p.lon, categories: p.categories || [],
           phone: (p.contact || {}).phone || raw.phone || raw["contact:phone"] || "",
           straight: haversineM(origin.lat, origin.lon, p.lat, p.lon), time: null, dist: null,
+          tags: { opening_hours: raw.opening_hours },
+          cls: (state.rules && window.FacilityClassifier && (kind === "hospital" || kind === "clinic"))
+            ? window.FacilityClassifier.classify(state.rules, { name: p.name, nameEn: raw["name:en"], nameBn: raw["name:bn"],
+                tags: { emergency: raw.emergency, healthcare: raw.healthcare, "healthcare:speciality": raw["healthcare:speciality"],
+                        "operator:type": raw["operator:type"] } })
+            : null,
         };
       }));
     });
@@ -224,7 +245,7 @@
       (d.sources_to_targets[0] || []).forEach(function (c) {
         if (c.time != null) { items[c.target_index].time = c.time; items[c.target_index].dist = c.distance; }
       });
-      return rankByTime(items);
+      return demoteNonEmergency(rankByTime(items));
     });
   }
 
@@ -247,6 +268,34 @@
     if (s == null) return state.pending ? "…" : t("noroute");
     return Math.max(1, Math.round(s / 60)) + " " + t("min");
   }
+  function ruleLabel(list, key) {
+    var hit = (list || []).filter(function (x) { return x.type === key || x.key === key; })[0];
+    return hit ? hit[state.lang === "bn" ? "bn" : "en"] : key;
+  }
+  function clsBadge(f) {
+    var c = f.cls, R = state.rules;
+    if (!c || !R) return "";
+    var spec = c.speciality ? ruleLabel(R.specialities, c.speciality) : "";
+    var html;
+    if (c.ed === "confirmed") {
+      html = '<p class="badge ok">🚑 ' + esc(t(c.speciality ? "cls_confirmed_spec" : "cls_confirmed").replace("{x}", spec)) +
+        ' <a href="' + esc(c.confirmed.source) + '" target="_blank" rel="noopener">' + esc(t("source")) + "</a></p>";
+    } else if (c.ed === "yes") {
+      html = '<p class="badge ok">🚑 ' + esc(t("cls_yes")) + (spec ? " · " + esc(spec) : "") + "</p>";
+    } else if (c.ed === "specialised" || (c.ed === "unknown" && spec)) {
+      html = '<p class="badge spec">' + esc(t("cls_spec").replace("{x}", spec)) + "</p>";
+    } else if (c.ed === "no") {
+      var what = ruleLabel((R.exclude || []).concat(R.soft_exclude || []), c.type);
+      html = '<p class="badge bad">⛔ ' + esc(what === c.type ? t("cls_no_map") : t("cls_no").replace("{x}", what)) + "</p>";
+    } else if (c.ed === "likely") {
+      html = '<p class="badge info">' + esc(t("cls_likely")) + (spec ? " · " + esc(spec) : "") + "</p>";
+    } else {
+      html = '<p class="badge info">' + esc(t("cls_unknown")) + "</p>";
+    }
+    if (f.tags && f.tags.opening_hours === "24/7") html += '<p class="badge info">🕐 ' + esc(t("open247")) + "</p>";
+    return html;
+  }
+
   function displayName(f) { return state.lang === "bn" && f.nameBn ? f.nameBn : f.name; }
   function fmtKm(m) { return m == null ? "–" : (m / 1000).toFixed(1) + " km"; }
 
@@ -278,9 +327,8 @@
         '<span class="time">' + esc(fmtMin(f.time)) + "</span></div>" +
         '<p class="meta">' + esc(fmtKm(f.dist)) + " " + esc(t("byroad")) + " · " + esc(fmtKm(f.straight)) + " " + esc(t("straight")) + "</p>" +
         (f.address ? '<p class="addr">' + esc(f.address) + "</p>" : "") +
-        (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" :
-          maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" :
-          maybeNotER(f.name, f.categories) ? '<p class="warn">⚠ ' + esc(t("noter")) + "</p>" : "") +
+        (f.cls ? clsBadge(f) : (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" : "")) +
+        (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" : "") +
         (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
         '<div class="actions"><button class="btn small" data-route="' + i + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div></article>";
     });
@@ -369,7 +417,13 @@
     });
   }
 
+  function loadRules() {
+    fetch("facility_rules.json?v=" + RULES_VERSION).then(function (r) { return r.json(); })
+      .then(function (j) { state.rules = j; }).catch(function () { state.rules = null; });
+  }
+
   function init() {
+    loadRules();
     try { if ((localStorage.getItem("lang") || "") === "bn") state.lang = "bn"; } catch (e) {}
     map = L.map("map", { zoomControl: true });
     L.tileLayer("https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=" + encodeURIComponent(apiKey()), {

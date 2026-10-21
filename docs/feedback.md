@@ -57,6 +57,14 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
    page still works from any script or server. *Suggestion:* an option such as "require a matching Origin or
    Referer" for keys meant only for the browser.
 
+10. **Most "hospitals" in Dhaka carry no information about emergency care, and `emergency=yes` is often wrong.**
+    Of 447 places in `healthcare.hospital` inside Dhaka city, 40 have an `emergency` tag, and 4 of the 35
+    `emergency=yes` tags sit on a homeo pharmacy, a dental clinic, an outpatient unit and a diagnostic centre. Our
+    name-based classifier ([evaluation](../benchmark/classify_eval.md)) labels 62 of the 447 as not an emergency facility
+    (dental 10, diagnostic 7, pharmacy 7, chamber 6, outpatient 6, ...). *Suggestion:* a Places condition or category
+    split for facilities with an emergency department, and moving obvious non-hospitals (`healthcare=laboratory`,
+    names with "Diagnostic"/"Pharmacy") out of `healthcare.hospital`.
+
 ## MCP tools
 
 1. **No outline or place-details tool.** `search_places` returns points only (one result had
@@ -69,6 +77,10 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
 3. **`geometry_scope: "steps"` silently depends on `include_instructions`.** The error is clear, but the
    dependency could be expressed in the schema description, or `include_instructions` could default to true
    when `steps` is requested.
-4. **`geocode_address` returns `rank.match_type` and `confidence`.** This is good. The tool description could tell
+4. **MCP `search_places` drops the OSM tags.** Its results include `datasource.sourcename` but not
+   `datasource.raw`, so an agent cannot see `emergency`, `healthcare:speciality`, `opening_hours` or `name:en`/`name:bn`,
+   which the REST Places API returns. For emergency questions these tags matter; exposing them (or a few of them)
+   would let agents do what our CLI does.
+5. **`geocode_address` returns `rank.match_type` and `confidence`.** This is good. The tool description could tell
    agents to check them before using the result, because a city-level fallback otherwise looks like a valid
    answer (see OpenAPI #3).

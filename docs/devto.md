@@ -243,8 +243,8 @@ What it does differently from a plain "nearest hospital" search:
   ![Suggestions while typing "dhanmo"](https://raw.githubusercontent.com/Abdullah-Atif/dhaka-emergency-finder/main/docs/images/app-suggestions.jpg)
 - **Results appear in two steps.** The 10 nearest places show by distance after the Places call (1.6 s in one test on a
   good connection; it depends on the network); they are re-sorted by travel time when the Route Matrix answers, and the route to #1 is drawn on the map.
-- **The same warnings as the CLI:** city-level geocoding fallback, "hospitals" whose name says diagnostic centre or eye
-  hospital, and a new one for places whose name says they are something else. In the Shahbag fire-service search,
+- **The same warnings as the CLI:** city-level geocoding fallback, and a badge on every hospital saying whether it
+  likely has an emergency department (see Part 6), plus a warning for places whose name says they are something else. In the Shahbag fire-service search,
   #2 was *"Mosque of Bangladesh Fire Service & Civil Defence Headquarter"*.
 - **It merges duplicates** ("radda" and "RADDA", 5 m apart, were both in the Places results).
 - **Bangla and English** interface, a **Navigate** button that opens directions in Google Maps, and **tap-to-call** for
@@ -285,7 +285,56 @@ heuristic, so verify before relying on it.
 
 ---
 
-## Part 6: Feedback for Geoapify
+## Part 6: Which "hospital" actually has an emergency department?
+
+Testing the app around Dhaka, the fastest "hospital" was often a diagnostic centre, a pharmacy or an unnamed building.
+Map data is the reason. Of the **447 places Geoapify returns as `healthcare.hospital` inside Dhaka city, none has a bed
+count, only 40 say anything about emergency care, and 4 of those 40 are wrong**: `emergency=yes` on a homeo pharmacy,
+a dental clinic, an outpatient unit and a diagnostic centre.
+
+So I ran a **deep-research pass**: four researchers in parallel, then one writer
+([full report with sources](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/docs/research/hospital-classification.md)). It covered the OSM tagging rules, Bangladeshi licensing and naming,
+sources for 24-hour emergency departments, and the status of the hotlines. Three findings shaped the design:
+
+- Bangladeshi law puts "hospital", "clinic" and "nursing home" in **one category**. Diagnostic centres, labs and blood
+  banks hold **separate licences** with no inpatient care. So a word like *Diagnostic* or *Chamber* in a name is a strong
+  "no", but *Hospital* alone proves little.
+- Government tiers (medical college hospitals, Upazila Health Complexes) reliably run emergency departments. Specialised
+  institutes take only their own kind of emergency (eye, trauma, children, burns, heart).
+- Strong sources confirm a 24-hour emergency department for only **7** Dhaka hospitals.
+
+From that, one rules file ([`facility_rules.json`](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/docs/app/facility_rules.json))
+drives the same classifier in the web app (JavaScript) and the CLI (Python). The two agree on all 837 hospital and clinic places
+in Dhaka:
+
+| Name in the map data | Badge |
+|---|---|
+| Dhaka Medical College Hospital, Government hospital, Secretariat Rd, Dhaka | 🚑 24-hour emergency (confirmed, with source) |
+| Mugda Medical College Hospital | 🚑 Government hospital: emergency expected |
+| Ibn Sina Hospital | Hospital: emergency department not verified |
+| Ispahani Islamia Eye Institute and Hospital | Specialised: eye emergencies only |
+| Square hospital **Consultation** and Diagnostic centre | ⛔ Not an emergency hospital: a consultation centre |
+| Meherun Homeo Pharmacy (tagged `emergency=yes`) | ⛔ Not an emergency hospital: a pharmacy |
+| Al Razi Hospital Complex (tagged `emergency=no`) | ⛔ Map data says: no emergency department |
+
+![Badges near Shahbag: PG Hospital and BIRDEM confirmed, one place not verified](https://raw.githubusercontent.com/Abdullah-Atif/dhaka-emergency-finder/main/docs/images/app-badges.jpg)
+
+Places marked ⛔ move to the end of the list but stay visible. The badges work in Bangla too, and Bangla names are
+matched (ডায়াগনস্টিক, চেম্বার, চক্ষু, শিশু, পঙ্গু ...).
+
+**How good is it?** ([evaluation](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/classify_eval.md))
+I reviewed a random sample of 40 places by hand: **36 of 40 were right**. The 4 misses were fixed: a consultation centre
+with "hospital" in its name, a real name hidden in the second comma part, "Orthopedic **and General** Hospital", and the
+typo "Metarnity". Because I fixed those rules on that same sample, I then checked **30 fresh places: 28 right**. The
+2 misses ended up as "unknown", never as a wrong answer. In both samples no non-hospital was promoted and no emergency
+hospital was hidden. And wherever the classifier disagreed with OSM's own `emergency` tag, the tag was the one that was wrong.
+
+What it still cannot do: say how big a hospital is or which departments it has. That data is simply not in the map,
+and fixing it upstream in OpenStreetMap would help every app.
+
+---
+
+## Part 7: Feedback for Geoapify
 
 The full list, with evidence for each point, is in [feedback.md](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/docs/feedback.md). The main suggestions:
 
@@ -296,6 +345,8 @@ The full list, with evidence for each point, is in [feedback.md](https://github.
 - MCP `geocode_address` could tell agents in its description to check `match_type` before using the result.
 - An MCP tool for place details or outlines. Today `search_places` returns points only.
 - A Places condition for hospitals with an emergency department (OpenStreetMap `emergency=yes`).
+- MCP `search_places` drops the OSM tags (`emergency`, `name:en`, `opening_hours`), which the REST Places API returns.
+- Address Autocomplete returns nothing for partial Bangla words, while search finds them.
 
 ---
 

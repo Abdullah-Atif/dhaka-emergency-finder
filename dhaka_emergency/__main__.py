@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 
+from .classify import load_rules
 from .finder import CATEGORIES, EMERGENCY_NUMBER, find
 from .geoapify import GeoapifyClient, GeoapifyError
 from .mapview import write_map
@@ -15,6 +16,29 @@ def _fmt_km(m):
 
 def _fmt_min(s):
     return "no route" if s is None else f"{round(s / 60)} min"
+
+
+def _label(list_, key):
+    return next((x["en"] for x in list_ if x.get("type") == key or x.get("key") == key), key)
+
+
+def _cls_line(f):
+    """One line in the same words as the web app's badges."""
+    c, rules = f.cls, load_rules()
+    spec = _label(rules["specialities"], c["speciality"]) if c["speciality"] else ""
+    if c["ed"] == "confirmed":
+        scope = " for " + spec if spec else ""
+        return f"24-hour emergency department{scope} (confirmed: {c['confirmed']['source']})"
+    if c["ed"] == "yes":
+        return "Government hospital: 24-hour emergency department expected" + (f" · {spec}" if spec else "")
+    if c["ed"] == "specialised" or (c["ed"] == "unknown" and spec):
+        return "Specialised: " + spec
+    if c["ed"] == "no":
+        what = _label(rules["exclude"] + rules["soft_exclude"], c["type"])
+        return "NOT an emergency hospital: " + what if what != c["type"] else "Map data says: no emergency department"
+    if c["ed"] == "likely":
+        return "Hospital: emergency department not verified" + (f" · {spec}" if spec else "")
+    return "Emergency department: unknown"
 
 
 def main(argv=None):
@@ -51,6 +75,7 @@ def main(argv=None):
             "emergency_number": EMERGENCY_NUMBER,
             "origin": vars(origin),
             "results": [dict(vars(f), maybe_not_er=f.maybe_not_er) for f in ranked],
+            "classification_rules": "docs/app/facility_rules.json",
         }, ensure_ascii=False, indent=2))
     else:
         print(f"!! Emergency? Call {EMERGENCY_NUMBER} first.\n")
@@ -65,8 +90,10 @@ def main(argv=None):
         for i, f in enumerate(ranked, 1):
             print(f"{i}. {f.name}")
             print(f"   {_fmt_min(f.drive_s)} | {_fmt_km(f.drive_m)} by road | {_fmt_km(f.straight_m)} straight line")
-            if f.maybe_not_er:
-                print("   Note: the name suggests this may not have an emergency department")
+            if f.cls:
+                print(f"   {_cls_line(f)}")
+            if f.opening_hours == "24/7":
+                print("   Open 24/7 (map data)")
             if f.address:
                 print(f"   {f.address}")
             if f.phone:

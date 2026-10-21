@@ -8,14 +8,6 @@ test("haversine: Dhaka Zero Point to Shahbag is about 1.6 to 2.3 km", () => {
   assert.ok(d > 1500 && d < 2300, String(d));
 });
 
-test("hospital-tagged diagnostic centres and eye hospitals are flagged", () => {
-  const hosp = ["healthcare", "healthcare.hospital"];
-  assert.ok(app.maybeNotER("Al Fateh Diagnostics", hosp));
-  assert.ok(app.maybeNotER("Ispahani Islamia Eye Institute and Hospital", hosp));
-  assert.ok(!app.maybeNotER("Shahbagh P.G. Hospital", hosp));
-  assert.ok(!app.maybeNotER("Ahammed Pharma", ["healthcare.pharmacy"]));
-});
-
 test("city-level geocoding fallback is detected (API spelling: disrict)", () => {
   assert.ok(app.isCoarse({ rank: { match_type: "match_by_city_or_disrict" } }));
   assert.ok(!app.isCoarse({ rank: { match_type: "full_match" } }));
@@ -73,4 +65,12 @@ test("unnamed places are never merged with each other", () => {
     { name: "(unnamed) · Road 1", unnamed: true, lat: 23.70, lon: 90.40 },
   ]);
   assert.strictEqual(out.length, 2);
+});
+
+test("non-emergency facilities move to the end, travel-time order kept otherwise", () => {
+  const out = app.demoteNonEmergency([
+    { n: "diagnostic", cls: { ed: "no" } }, { n: "A", cls: { ed: "likely" } },
+    { n: "pharmacy", cls: { ed: "no" } }, { n: "B", cls: { ed: "confirmed" } }, { n: "C" },
+  ]);
+  assert.deepStrictEqual(out.map((x) => x.n), ["A", "B", "C", "diagnostic", "pharmacy"]);
 });

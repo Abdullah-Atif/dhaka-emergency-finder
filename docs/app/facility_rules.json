@@ -1,0 +1,780 @@
+{
+ "version": "2026-10-22",
+ "about": "Name + OSM tag rules for Dhaka health facilities. Built from the research report 'Dhaka emergency hospital classification' (OSM wiki, DGHS licensing, Bangladeshi news). One file for the web app and the CLI. Words are matched on normalised text: lower case, Latin punctuation removed, Bangla spelling variants unified.",
+ "normalize": [
+  [
+   "মেডিক্যাল",
+   "মেডিকেল"
+  ],
+  [
+   "হসপিটাল",
+   "হাসপাতাল"
+  ],
+  [
+   "জরুরী",
+   "জরুরি"
+  ],
+  [
+   "ডায়াগনষ্টিক",
+   "ডায়াগনস্টিক"
+  ],
+  [
+   "specialised",
+   "specialized"
+  ],
+  [
+   "speciality",
+   "specialty"
+  ],
+  [
+   "centre",
+   "center"
+  ],
+  [
+   "paediatric",
+   "pediatric"
+  ],
+  [
+   "orthopaedic",
+   "orthopedic"
+  ],
+  [
+   "homoeo",
+   "homeo"
+  ],
+  [
+   "diagonstic",
+   "diagnostic"
+  ],
+  [
+   "humiopathik",
+   "homeopathic"
+  ],
+  [
+   "lab aid",
+   "labaid"
+  ],
+  [
+   "opthalmology",
+   "ophthalmology"
+  ],
+  [
+   "metarnity",
+   "maternity"
+  ],
+  [
+   "maternaty",
+   "maternity"
+  ],
+  [
+   "ডায়াগনোষ্টিক",
+   "ডায়াগনস্টিক"
+  ],
+  [
+   "ডায়াগনোস্টিক",
+   "ডায়াগনস্টিক"
+  ]
+ ],
+ "hospital_words": [
+  "hospital",
+  "hospitals",
+  "হাসপাতাল",
+  "health complex",
+  "স্বাস্থ্য কমপ্লেক্স"
+ ],
+ "exclude": [
+  {
+   "type": "consultation",
+   "en": "a consultation centre",
+   "bn": "কনসালটেশন সেন্টার",
+   "words": [
+    "consultation",
+    "কনসালটেশন"
+   ]
+  },
+  {
+   "type": "veterinary",
+   "en": "an animal hospital",
+   "bn": "পশু হাসপাতাল",
+   "words": [
+    "veterinary",
+    "vet",
+    "vetrx",
+    "pet",
+    "animal",
+    "পশু",
+    "প্রাণী",
+    "ভেটেরিনারি"
+   ]
+  },
+  {
+   "type": "pharmacy",
+   "en": "a pharmacy",
+   "bn": "ফার্মেসি",
+   "words": [
+    "pharmacy",
+    "pharma",
+    "medicine corner",
+    "medical hall",
+    "drug house",
+    "drugs",
+    "ফার্মেসি",
+    "ঔষধালয়",
+    "মেডিসিন কর্নার"
+   ]
+  },
+  {
+   "type": "homeopathy",
+   "en": "a homeopathy / traditional medicine place",
+   "bn": "হোমিও বা ভেষজ চিকিৎসা",
+   "words": [
+    "homeo",
+    "homeopathic",
+    "homeopathy",
+    "ayurvedic",
+    "unani",
+    "hamdard",
+    "dawakhana",
+    "kabiraj",
+    "হোমিও",
+    "আয়ুর্বেদিক",
+    "ইউনানী",
+    "দাওয়াখানা",
+    "কবিরাজ"
+   ]
+  },
+  {
+   "type": "alternative",
+   "en": "an alternative-therapy centre",
+   "bn": "বিকল্প চিকিৎসা কেন্দ্র",
+   "words": [
+    "hijama",
+    "cupping",
+    "ruqyah",
+    "হিজামা"
+   ]
+  },
+  {
+   "type": "dental",
+   "en": "a dental clinic",
+   "bn": "দাঁতের ক্লিনিক",
+   "words": [
+    "dental",
+    "dentist",
+    "dentistry",
+    "tooth",
+    "teeth",
+    "ডেন্টাল",
+    "দন্ত",
+    "দাঁতের"
+   ]
+  },
+  {
+   "type": "optical",
+   "en": "an optical shop",
+   "bn": "চশমার দোকান",
+   "words": [
+    "optical",
+    "opticals",
+    "চশমা",
+    "অপটিক্যাল"
+   ]
+  },
+  {
+   "type": "blood_bank",
+   "en": "a blood bank",
+   "bn": "ব্লাড ব্যাংক",
+   "words": [
+    "blood bank",
+    "transfusion",
+    "sandhani",
+    "badhan",
+    "ব্লাড ব্যাংক",
+    "রক্তদান",
+    "সন্ধানী",
+    "বাঁধন"
+   ]
+  },
+  {
+   "type": "laboratory",
+   "en": "a laboratory",
+   "bn": "ল্যাবরেটরি",
+   "words": [
+    "laboratory",
+    "pathology",
+    "collection point",
+    "প্যাথলজি",
+    "ল্যাবরেটরি"
+   ]
+  },
+  {
+   "type": "chamber",
+   "en": "a doctor's chamber",
+   "bn": "ডাক্তারের চেম্বার",
+   "words": [
+    "chamber",
+    "চেম্বার"
+   ]
+  },
+  {
+   "type": "outpatient",
+   "en": "an outpatient unit",
+   "bn": "বহির্বিভাগ",
+   "words": [
+    "outdoor",
+    "opd",
+    "cabin block",
+    "বহির্বিভাগ",
+    "আউটডোর"
+   ]
+  },
+  {
+   "type": "dialysis",
+   "en": "a dialysis centre",
+   "bn": "ডায়ালাইসিস কেন্দ্র",
+   "words": [
+    "dialysis",
+    "ডায়ালাইসিস"
+   ]
+  },
+  {
+   "type": "rehab",
+   "en": "a drug rehabilitation centre",
+   "bn": "মাদকাসক্তি নিরাময় কেন্দ্র",
+   "words": [
+    "drug addiction",
+    "addiction",
+    "মাদকাসক্তি",
+    "নিরাময় কেন্দ্র"
+   ]
+  },
+  {
+   "type": "college",
+   "en": "a nursing college",
+   "bn": "নার্সিং কলেজ",
+   "words": [
+    "nursing college",
+    "nursing institute",
+    "নার্সিং কলেজ"
+   ]
+  },
+  {
+   "type": "community_clinic",
+   "en": "a community clinic (daytime only)",
+   "bn": "কমিউনিটি ক্লিনিক (শুধু দিনে)",
+   "words": [
+    "community clinic",
+    "epi center",
+    "কমিউনিটি ক্লিনিক"
+   ]
+  },
+  {
+   "type": "other_place",
+   "en": "a different kind of place (e.g. a mosque)",
+   "bn": "অন্য ধরনের জায়গা (যেমন মসজিদ)",
+   "words": [
+    "mosque",
+    "masjid",
+    "মসজিদ",
+    "school",
+    "canteen"
+   ]
+  }
+ ],
+ "soft_exclude": [
+  {
+   "type": "diagnostic",
+   "en": "a diagnostic centre",
+   "bn": "ডায়াগনস্টিক সেন্টার",
+   "words": [
+    "diagnostic",
+    "diagnostics",
+    "diagnosis",
+    "imaging",
+    "ডায়াগনস্টিক"
+   ]
+  },
+  {
+   "type": "laboratory",
+   "en": "a laboratory",
+   "bn": "ল্যাবরেটরি",
+   "words": [
+    "lab",
+    "ল্যাব"
+   ]
+  },
+  {
+   "type": "physio",
+   "en": "a physiotherapy / rehabilitation centre",
+   "bn": "ফিজিওথেরাপি কেন্দ্র",
+   "words": [
+    "physiotherapy",
+    "physio",
+    "rehabilitation",
+    "ফিজিওথেরাপি",
+    "পুনর্বাসন"
+   ]
+  },
+  {
+   "type": "chamber",
+   "en": "a doctor's practice",
+   "bn": "ডাক্তারের চেম্বার",
+   "prefix": [
+    "dr ",
+    "ডা "
+   ]
+  }
+ ],
+ "specialities": [
+  {
+   "key": "maternity",
+   "en": "pregnancy and childbirth only",
+   "bn": "শুধু প্রসূতি",
+   "ed": "specialised",
+   "words": [
+    "maternity",
+    "matri",
+    "matrisadan",
+    "mother and child",
+    "mother & child",
+    "mcwc",
+    "obstetric",
+    "মাতৃসদন",
+    "মাতৃ",
+    "প্রসূতি",
+    "মা ও শিশু",
+    "mch fp",
+    "mchfp",
+    "family planning",
+    "পরিবার পরিকল্পনা",
+    "মেটারনিটি"
+   ]
+  },
+  {
+   "key": "children",
+   "en": "children only",
+   "bn": "শুধু শিশু",
+   "ed": "specialised",
+   "words": [
+    "shishu",
+    "sishu",
+    "child",
+    "children",
+    "childrens",
+    "pediatric",
+    "pediatrics",
+    "neonatal",
+    "শিশু"
+   ]
+  },
+  {
+   "key": "eye",
+   "en": "eye emergencies only",
+   "bn": "শুধু চোখের জরুরি অবস্থা",
+   "ed": "specialised",
+   "words": [
+    "eye",
+    "ophthalmology",
+    "ophthalmic",
+    "chokkhu",
+    "chakkhu",
+    "vision",
+    "retina",
+    "চক্ষু",
+    "চোখ"
+   ]
+  },
+  {
+   "key": "heart",
+   "en": "heart emergencies only",
+   "bn": "শুধু হৃদরোগ",
+   "ed": "specialised",
+   "words": [
+    "heart",
+    "cardiac",
+    "cardiology",
+    "cardiovascular",
+    "hridrog",
+    "হৃদরোগ",
+    "হার্ট",
+    "কার্ডিয়াক"
+   ]
+  },
+  {
+   "key": "trauma",
+   "en": "injuries and fractures only",
+   "bn": "শুধু আঘাত ও হাড়ভাঙা",
+   "ed": "specialised",
+   "words": [
+    "trauma",
+    "traumatology",
+    "orthopedic",
+    "orthopedics",
+    "pongu",
+    "pangu",
+    "nitor",
+    "পঙ্গু",
+    "অর্থোপেডিক",
+    "ট্রমা"
+   ]
+  },
+  {
+   "key": "burn",
+   "en": "burns only",
+   "bn": "শুধু পোড়া",
+   "ed": "specialised",
+   "words": [
+    "burn",
+    "burns",
+    "plastic surgery",
+    "বার্ন"
+   ]
+  },
+  {
+   "key": "kidney",
+   "en": "kidney emergencies only",
+   "bn": "শুধু কিডনি",
+   "ed": "specialised",
+   "words": [
+    "kidney",
+    "urology",
+    "nephrology",
+    "কিডনি",
+    "ইউরোলজি"
+   ]
+  },
+  {
+   "key": "mental",
+   "en": "mental health only",
+   "bn": "শুধু মানসিক স্বাস্থ্য",
+   "ed": "specialised",
+   "words": [
+    "mental",
+    "psychiatric",
+    "psychiatry",
+    "মানসিক",
+    "mind",
+    "mononiramoy",
+    "মনোনিরাময়"
+   ]
+  },
+  {
+   "key": "neuro",
+   "en": "brain and stroke only",
+   "bn": "শুধু মস্তিষ্ক ও স্ট্রোক",
+   "ed": "specialised",
+   "words": [
+    "neuro",
+    "neurology",
+    "neurosciences",
+    "neuroscience",
+    "stroke",
+    "brain",
+    "নিউরো",
+    "স্নায়ু"
+   ]
+  },
+  {
+   "key": "ent",
+   "en": "ear, nose and throat only",
+   "bn": "শুধু নাক-কান-গলা",
+   "ed": "specialised",
+   "words": [
+    "ent",
+    "nak kan gola",
+    "নাক কান গলা"
+   ]
+  },
+  {
+   "key": "gastro",
+   "en": "stomach and liver only",
+   "bn": "শুধু পেট ও লিভার",
+   "ed": "specialised",
+   "words": [
+    "gastro",
+    "gastroliver",
+    "liver",
+    "লিভার"
+   ]
+  },
+  {
+   "key": "infectious",
+   "en": "infectious diseases only",
+   "bn": "শুধু সংক্রামক রোগ",
+   "ed": "specialised",
+   "words": [
+    "infectious",
+    "সংক্রামক"
+   ]
+  },
+  {
+   "key": "cancer",
+   "en": "a cancer hospital (not for general emergencies)",
+   "bn": "ক্যান্সার হাসপাতাল (সাধারণ জরুরি অবস্থার জন্য নয়)",
+   "ed": "unknown",
+   "words": [
+    "cancer",
+    "oncology",
+    "ক্যান্সার",
+    "ক্যানসার"
+   ]
+  },
+  {
+   "key": "chest",
+   "en": "a chest / TB hospital",
+   "bn": "বক্ষব্যাধি বা যক্ষ্মা হাসপাতাল",
+   "ed": "unknown",
+   "words": [
+    "chest",
+    "tb",
+    "tuberculosis",
+    "বক্ষব্যাধি",
+    "যক্ষ্মা"
+   ]
+  }
+ ],
+ "osm_speciality": {
+  "ophthalmology": "eye",
+  "paediatrics": "children",
+  "pediatrics": "children",
+  "neonatology": "children",
+  "gynaecology": "maternity",
+  "obstetrics": "maternity",
+  "cardiology": "heart",
+  "orthopaedics": "trauma",
+  "trauma": "trauma",
+  "plastic_surgery": "burn",
+  "nephrology": "kidney",
+  "urology": "kidney",
+  "neurology": "neuro",
+  "otolaryngology": "ent",
+  "psychiatry": "mental",
+  "oncology": "cancer",
+  "gastroenterology": "gastro",
+  "pulmonology": "chest",
+  "infectious_diseases": "infectious",
+  "dentistry": "dental",
+  "dental": "dental",
+  "veterinary": "veterinary"
+ },
+ "osm_not_hospital": [
+  "laboratory",
+  "physiotherapist",
+  "occupational_therapist",
+  "pharmacy",
+  "dentist",
+  "blood_donation",
+  "dialysis",
+  "optometrist",
+  "alternative",
+  "psychotherapist",
+  "sample_collection",
+  "rehabilitation"
+ ],
+ "government_general": [
+  "upazila health complex",
+  "thana health complex",
+  "sadar hospital",
+  "district hospital",
+  "250 bed",
+  "500 bed",
+  "উপজেলা স্বাস্থ্য কমপ্লেক্স",
+  "সদর হাসপাতাল",
+  "জেলা হাসপাতাল",
+  "২৫০ শয্যা"
+ ],
+ "government_signal": [
+  "government",
+  "govt",
+  "public",
+  "সরকারি",
+  "national institute",
+  "জাতীয়"
+ ],
+ "medical_college_hospital": [
+  "medical college hospital",
+  "medical college and hospital",
+  "medical college & hospital",
+  "মেডিকেল কলেজ হাসপাতাল",
+  "মেডিকেল কলেজ ও হাসপাতাল"
+ ],
+ "general_tertiary": [
+  "birdem",
+  "বারডেম"
+ ],
+ "emergency_words": [
+  "emergency",
+  "casualty",
+  "24 hours",
+  "24 hour",
+  "জরুরি",
+  "ইমার্জেন্সি",
+  "২৪ ঘণ্টা"
+ ],
+ "small_facility": [
+  "clinic",
+  "polyclinic",
+  "nursing home",
+  "medical center",
+  "health center",
+  "ক্লিনিক",
+  "নার্সিং হোম",
+  "মেডিকেল সেন্টার"
+ ],
+ "confirmed": [
+  {
+   "id": "dmch",
+   "name": "Dhaka Medical College Hospital",
+   "scope": "general",
+   "aliases": [
+    "dhaka medical college hospital",
+    "dmch",
+    "ঢাকা মেডিকেল কলেজ হাসপাতাল"
+   ],
+   "source": "https://www.jagonews24.com/en/national/news/83286"
+  },
+  {
+   "id": "bmu",
+   "name": "Bangladesh Medical University (BSMMU / PG Hospital)",
+   "scope": "general",
+   "aliases": [
+    "bangladesh medical university",
+    "bsmmu",
+    "bangabandhu sheikh mujib medical university",
+    "pg hospital",
+    "shahbagh pg hospital",
+    "পিজি হাসপাতাল",
+    "বাংলাদেশ মেডিকেল বিশ্ববিদ্যালয়",
+    "বঙ্গবন্ধু শেখ মুজিব মেডিকেল বিশ্ববিদ্যালয়",
+    "pg hospital dhaka",
+    "institute of post graduates medicine and research",
+    "ipgmr"
+   ],
+   "source": "https://www.tbsnews.net/node/323959"
+  },
+  {
+   "id": "nitor",
+   "name": "NITOR (Pongu Hospital)",
+   "scope": "trauma",
+   "aliases": [
+    "nitor",
+    "national institute of traumatology and orthopedic rehabilitation",
+    "national institute of traumatology orthopedic and rehabilitation",
+    "পঙ্গু হাসপাতাল"
+   ],
+   "source": "https://nitor.gov.bd/patient-service/emergency/"
+  },
+  {
+   "id": "nioh",
+   "name": "National Institute of Ophthalmology & Hospital",
+   "scope": "eye",
+   "aliases": [
+    "national institute of ophthalmology and hospital",
+    "national institute of ophthalmology",
+    "জাতীয় চক্ষু বিজ্ঞান ইনস্টিটিউট ও হাসপাতাল",
+    "জাতীয় চক্ষুবিজ্ঞান ইনস্টিটিউট ও হাসপাতাল"
+   ],
+   "source": "https://nioh.gov.bd/services"
+  },
+  {
+   "id": "birdem",
+   "name": "BIRDEM General Hospital",
+   "scope": "general",
+   "aliases": [
+    "birdem general hospital",
+    "birdem hospital",
+    "birdem",
+    "বারডেম জেনারেল হাসপাতাল",
+    "বারডেম হাসপাতাল"
+   ],
+   "source": "https://birdembd.org/?q=ermergency-services"
+  },
+  {
+   "id": "evercare",
+   "name": "Evercare Hospital Dhaka (formerly Apollo)",
+   "scope": "general",
+   "aliases": [
+    "evercare hospital dhaka",
+    "evercare hospital",
+    "evercare",
+    "apollo hospitals dhaka",
+    "apollo hospital dhaka",
+    "এভারকেয়ার হাসপাতাল"
+   ],
+   "source": "https://www.evercarebd.com/en/dhaka/specialities/accident-emergency"
+  },
+  {
+   "id": "bsh",
+   "name": "Bangladesh Specialized Hospital",
+   "scope": "general",
+   "aliases": [
+    "bangladesh specialized hospital"
+   ],
+   "source": "https://bdspecializedhospital.com/department/emergency"
+  }
+ ],
+ "confirmed_checked": "2026-10",
+ "government_hospitals": [
+  "mugda medical college hospital",
+  "mugda general hospital",
+  "shaheed suhrawardy medical college hospital",
+  "suhrawardy hospital",
+  "sir salimullah medical college",
+  "mitford hospital",
+  "kurmitola general hospital",
+  "kuwait bangladesh friendship government hospital",
+  "kuwait bangladesh friendship govt hospital",
+  "kuwait bangladesh moitree",
+  "মুগদা মেডিকেল কলেজ হাসপাতাল",
+  "শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ হাসপাতাল",
+  "সোহরাওয়ার্দী হাসপাতাল",
+  "মিটফোর্ড",
+  "কুর্মিটোলা জেনারেল হাসপাতাল",
+  "কুয়েত বাংলাদেশ মৈত্রী"
+ ],
+ "about_government_hospitals": "Government general hospitals named in the research report as 'likely' 24h (tier-based); shown as 'government hospital, emergency expected', not as confirmed.",
+ "general_words": [
+  "general",
+  "জেনারেল"
+ ],
+ "generic_name_parts": [
+  "hospital",
+  "hospitals",
+  "government hospital",
+  "general hospital",
+  "private hospital",
+  "specialized hospital",
+  "medical center",
+  "clinic",
+  "হাসপাতাল"
+ ],
+ "address_words": [
+  "rd",
+  "road",
+  "lane",
+  "ln",
+  "street",
+  "st",
+  "avenue",
+  "sarak",
+  "sarani",
+  "shorok",
+  "bridge",
+  "market",
+  "plaza",
+  "tower",
+  "bhaban",
+  "building",
+  "dhaka",
+  "chowrasta",
+  "bazar",
+  "sector",
+  "block",
+  "house",
+  "holding",
+  "চৌরাস্তা",
+  "রোড",
+  "সড়ক",
+  "ঢাকা"
+ ]
+}

@@ -114,13 +114,27 @@ class FinderTests(unittest.TestCase):
         self.assertFalse(origin.coarse)
 
     def test_non_emergency_names_flagged(self):
-        hosp = ["healthcare", "healthcare.hospital"]
-        mk = lambda name, cats=hosp: finder.Facility(name, "", 0, 0, 0, categories=cats)  # noqa: E731
-        self.assertTrue(mk("Al Fateh Diagnostics").maybe_not_er)
-        self.assertTrue(mk("Ahammed Pharma").maybe_not_er)
-        self.assertTrue(mk("Ispahani Islamia Eye Institute and Hospital").maybe_not_er)
-        self.assertFalse(mk("Shahbagh P.G. Hospital").maybe_not_er)
-        self.assertFalse(mk("Ahammed Pharma", ["healthcare", "healthcare.pharmacy"]).maybe_not_er)
+        def facility(name, cats=("healthcare", "healthcare.hospital")):
+            feat = {"properties": {"name": name, "lon": 90.4, "lat": 23.8, "categories": list(cats)}}
+            return finder._to_facility(feat, finder.Origin(90.4, 23.8, "x"))
+        self.assertTrue(facility("Al Fateh Diagnostics").maybe_not_er)
+        self.assertTrue(facility("Ispahani Islamia Eye Institute and Hospital").maybe_not_er)
+        self.assertFalse(facility("Shahbagh P.G. Hospital").maybe_not_er)   # confirmed (BMU)
+        self.assertIsNone(facility("Ahammed Pharma", ["commercial.chemist"]).cls)  # not a hospital search
+
+    def test_non_emergency_places_go_last(self):
+        class Mixed(FakeClient):
+            def places(self, lon, lat, categories, radius_m, limit=20):
+                fs = [feature("Al Fateh Diagnostics", 90.3660, 23.8075), feature("B Hospital", 90.3700, 23.8100),
+                      feature("C Hospital", 90.3800, 23.8200), feature("D Hospital", 90.3900, 23.8300),
+                      feature("E Hospital", 90.4000, 23.8400)]
+                for f in fs:
+                    f["properties"]["categories"] = ["healthcare", "healthcare.hospital"]
+                return fs
+            def route_matrix(self, source, targets, mode="drive"):
+                return [{"distance": 100, "time": 60 if lon == 90.3660 else 600} for lon, _lat in targets]
+        _, ranked = finder.find(Mixed(), "Mirpur 10")
+        self.assertEqual(ranked[-1].name, "Al Fateh Diagnostics")   # fastest, but not an emergency facility
 
     def test_dedupe_dmch_point_and_campus(self):
         mk = lambda n, lat, lon: finder.Facility(n, "", lon, lat, 0)  # noqa: E731

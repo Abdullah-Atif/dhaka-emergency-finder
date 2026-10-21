@@ -174,6 +174,27 @@ emergency facilities only, and a 10-location benchmark.
   ("may be a small clinic or office; check before going"). The ranking itself is unchanged: the app should not
   silently prefer places it *thinks* are bigger. The real fix needs data: an emergency-department tag (feedback #6).
 
+## 2026-10-22: deep research and a name-based classifier
+
+- User request: "the names say a lot, guess better from them" after seeing diagnostic centres and an unnamed
+  building ranked as the fastest "hospital", with no information on size or departments.
+- Measured first: of 447 `healthcare.hospital` places in Dhaka, no place has `beds`, 40 have `emergency`, and only a few
+  percent have `healthcare:speciality`, `phone` or `opening_hours`. Size and departments cannot be shown from the data.
+- Ran a deep-research pass with 4 parallel researchers + a writer (report: [research/hospital-classification.md](research/hospital-classification.md)):
+  OSM tagging rules and Dhaka data problems; Bangladeshi naming and licensing (hospital/clinic/nursing home are one
+  legal category; diagnostic centres are licensed separately); sources for 24-hour emergency departments (strongly
+  confirmed for only 7); hotline status (999 active; fire service now 102; 16263 uncertain after a 2026 funding crisis).
+- Built `docs/app/facility_rules.json` + `classify.js` (web app) and `dhaka_emergency/classify.py` (CLI) from it. They
+  agree on all 837 hospital/clinic places in Dhaka and share 30 test cases.
+- Evaluation ([benchmark/classify_eval.md](../benchmark/classify_eval.md)): 40-place random sample reviewed by hand:
+  36/40 right, 4 fixed (a consultation centre with "hospital" in its name, the real name in the second comma part,
+  "Orthopedic **and General** Hospital", the typo "Metarnity"). Because the fixes were made on that sample, I then
+  checked a **fresh** sample of 30: 28/30 right, 2 left as "unknown" ("Mononiramoy", a mental-health centre: rule
+  added afterwards; "DigiLab"). No dangerous error in either sample. In every disagreement with OSM's own
+  `emergency` tag, the tag was the one that was wrong.
+- App and CLI now show a badge per place (confirmed / government / not verified / specialised / not an emergency
+  facility / unknown) and move "not an emergency facility" places to the end of the list.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

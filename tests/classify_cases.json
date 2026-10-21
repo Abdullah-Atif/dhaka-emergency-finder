@@ -1,0 +1,224 @@
+[
+ {
+  "name": "Dhaka Medical College Hospital, Government hospital, Secretariat Rd, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "confirmed",
+  "speciality": null
+ },
+ {
+  "name": "ঢাকা মেডিক্যাল কলেজ হাসপাতাল",
+  "nameEn": "Dhaka Medical College Hospital",
+  "tags": {
+   "emergency": "yes"
+  },
+  "ed": "confirmed",
+  "speciality": null
+ },
+ {
+  "name": "Shahbagh P.G. Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "confirmed",
+  "speciality": null
+ },
+ {
+  "name": "NITOR",
+  "nameEn": null,
+  "tags": {},
+  "ed": "confirmed",
+  "speciality": "trauma"
+ },
+ {
+  "name": "Mugda Medical College Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "yes",
+  "speciality": null
+ },
+ {
+  "name": "Savar Upazila Health Complex",
+  "nameEn": null,
+  "tags": {},
+  "ed": "yes",
+  "speciality": null
+ },
+ {
+  "name": "Ibn Sina Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "likely",
+  "speciality": null
+ },
+ {
+  "name": "Labaid Specialized Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "likely",
+  "speciality": null
+ },
+ {
+  "name": "National Healthcare Network, Ibrahim General Hospital, Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "likely",
+  "speciality": null
+ },
+ {
+  "name": "Monowara Orthopedic and General Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "likely",
+  "speciality": "trauma"
+ },
+ {
+  "name": "Ispahani Islamia Eye Institute and Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "eye"
+ },
+ {
+  "name": "Brain and Mind Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "mental"
+ },
+ {
+  "name": "Burn & Plastic Surgery Unit, Hospital, Secretariate Road, Dhaka Medical College Hospital, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "burn"
+ },
+ {
+  "name": "Azimpur Maternity Hospital, Azimpur Rd, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "maternity"
+ },
+ {
+  "name": "BRAC Metarnity Centre(ব্রাক মেটারনিটি সেন্টার)",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "maternity"
+ },
+ {
+  "name": "National Institute of Cancer Research & Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "unknown",
+  "speciality": "cancer"
+ },
+ {
+  "name": "Puspit Nursing Home",
+  "nameEn": null,
+  "tags": {},
+  "ed": "unknown",
+  "speciality": null
+ },
+ {
+  "name": "Al Fateh Diagnostics",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "LabAid Limited (Diagnostic), Hospital, Doyagonj New Rd, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Square hospital Consultation and Diagnostic centre",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Meherun Homeo Pharmacy",
+  "nameEn": null,
+  "tags": {
+   "emergency": "yes"
+  },
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Tooth Fairy",
+  "nameEn": null,
+  "tags": {
+   "emergency": "yes"
+  },
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "PG Outdoor",
+  "nameEn": null,
+  "tags": {
+   "emergency": "yes"
+  },
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "National Veterinary Hospital, Bangabazar Chakkar, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Best One Hijama Center, Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Chowdury Doctors Chamber(চৌধুরী ডক্টরস চেম্বার)",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Al Razi Hospital Complex",
+  "nameEn": null,
+  "tags": {
+   "emergency": "no"
+  },
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Mosque of Bangladesh Fire Service & Civil Defence Headquarter",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Some Physio Centre",
+  "nameEn": null,
+  "tags": {
+   "healthcare": "physiotherapist"
+  },
+  "ed": "no",
+  "speciality": null
+ },
+ {
+  "name": "Dr M R Khan Shishu Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "specialised",
+  "speciality": "children"
+ }
+]
