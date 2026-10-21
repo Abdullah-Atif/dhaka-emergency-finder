@@ -122,6 +122,19 @@ class FinderTests(unittest.TestCase):
         self.assertFalse(mk("Shahbagh P.G. Hospital").maybe_not_er)
         self.assertFalse(mk("Ahammed Pharma", ["healthcare", "healthcare.pharmacy"]).maybe_not_er)
 
+    def test_dedupe_dmch_point_and_campus(self):
+        mk = lambda n, lat, lon: finder.Facility(n, "", lon, lat, 0)  # noqa: E731
+        out = finder.dedupe([
+            mk("Dhaka Medical College Hospital, Government hospital, Secretariat Rd, Dhaka", 23.7259, 90.3973),
+            mk("Dhaka Medical College Hospital", 23.7255, 90.3978),
+            mk("Burn & Plastic Surgery Unit, Dhaka Medical College Hospital, Dhaka", 23.7257, 90.3980),
+            mk("radda", 23.80756, 90.36969), mk("RADDA", 23.80755, 90.36976),
+            mk("(unnamed) · Road 1", 23.70, 90.40), mk("(unnamed) · Road 1", 23.70, 90.40),
+        ])
+        self.assertEqual([f.name for f in out], ["Dhaka Medical College Hospital",
+                                                 "Burn & Plastic Surgery Unit, Dhaka Medical College Hospital, Dhaka",
+                                                 "radda", "(unnamed) · Road 1", "(unnamed) · Road 1"])
+
     def test_map_written(self):
         client = FakeClient()
         origin, ranked = finder.find(client, "Mirpur 10")

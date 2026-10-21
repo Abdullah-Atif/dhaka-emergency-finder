@@ -154,6 +154,17 @@ emergency facilities only, and a 10-location benchmark.
   Verified in the browser: "dhanmo" → 5 suggestions, ↓ + Enter picks one and runs the search; "ধানমন্ডি" → 2
   suggestions through the fallback.
 
+## 2026-10-22: "Why is Dhaka Medical College Hospital unnamed?"
+
+- User report. I could not reproduce DMCH itself as unnamed, but the check found two real problems near it:
+  (1) an **unnamed** hospital-tagged building right beside DMCH (OSM way 1478513844, address "Kazi Motaher hossain vaban").
+  It was shown as "(unnamed)", which is easy to mistake for DMCH. It is now shown as "(unnamed) · Kazi Motaher hossain vaban".
+  (2) DMCH appeared **twice**: a point with the address appended to its name, and the campus outline with a Bangla `name`
+  and English `name:en`.
+- Fixes in both the web app and the CLI: prefer `name:en` (the web app shows `name:bn` / Bangla `name` in the Bangla
+  interface); merge duplicates when one name is the start of the other (12 or more characters) and they are less than
+  300 m apart; never merge unnamed places. Tests added in both languages.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

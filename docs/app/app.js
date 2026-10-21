@@ -56,16 +56,32 @@
     });
   }
 
-  // OpenStreetMap often has the same place twice ("radda" and "RADDA", 5 m apart). Keep the first.
-  function dedupe(items, meters) {
+  // OpenStreetMap often has the same place twice: "radda" and "RADDA" 5 m apart, or Dhaka Medical College Hospital as
+  // a point named "Dhaka Medical College Hospital, Government hospital, Secretariat Rd, Dhaka" plus the campus outline
+  // named "ঢাকা মেডিক্যাল কলেজ হাসপাতাল" (name:en "Dhaka Medical College Hospital"). Merge them; keep the nearer one,
+  // the shorter (cleaner) English name and any Bangla name or phone number.
+  function normName(n) { return (n || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, ""); }
+  function samePlace(a, b) {
+    var ka = [normName(a.name), normName(a.nameBn)].filter(Boolean);
+    var kb = [normName(b.name), normName(b.nameBn)].filter(Boolean);
+    var d = haversineM(a.lat, a.lon, b.lat, b.lon);
+    return ka.some(function (x) {
+      return kb.some(function (y) {
+        if (x === y) return d < 30 || (x.length >= 12 && d < 300);
+        var shorter = x.length < y.length ? x : y, longer = x.length < y.length ? y : x;
+        return shorter.length >= 12 && longer.indexOf(shorter) === 0 && d < 300;
+      });
+    });
+  }
+  function dedupe(items) {
     var out = [];
     items.forEach(function (f) {
-      var key = (f.name || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, "");
-      var dup = out.some(function (g) {
-        var gk = (g.name || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, "");
-        return key && key === gk && haversineM(f.lat, f.lon, g.lat, g.lon) < (meters || 30);
-      });
-      if (!dup) out.push(f);
+      var g = null;
+      for (var i = 0; i < out.length && !g; i++) if (!out[i].unnamed && !f.unnamed && samePlace(out[i], f)) g = out[i];
+      if (!g) { out.push(f); return; }
+      if (f.name && f.name.length < g.name.length) g.name = f.name;
+      g.nameBn = g.nameBn || f.nameBn;
+      g.phone = g.phone || f.phone;
     });
     return out;
   }
@@ -180,7 +196,11 @@
         var p = ft.properties || {};
         var raw = (p.datasource || {}).raw || {};
         return {
-          name: p.name || "(unnamed)", address: p.address_line2 || p.formatted || "",
+          // Prefer the English name; keep the Bangla one for the Bangla interface. Unnamed: show the building/street.
+          name: raw["name:en"] || p.name || ("(unnamed) · " + (p.address_line1 || "")).replace(/ · $/, ""),
+          nameBn: raw["name:bn"] || (isBangla(p.name) ? p.name : ""),
+          unnamed: !p.name && !raw["name:en"],
+          address: p.address_line2 || p.formatted || "",
           lat: p.lat, lon: p.lon, categories: p.categories || [],
           phone: (p.contact || {}).phone || raw.phone || raw["contact:phone"] || "",
           straight: haversineM(origin.lat, origin.lon, p.lat, p.lon), time: null, dist: null,
@@ -223,6 +243,7 @@
     if (s == null) return state.pending ? "…" : t("noroute");
     return Math.max(1, Math.round(s / 60)) + " " + t("min");
   }
+  function displayName(f) { return state.lang === "bn" && f.nameBn ? f.nameBn : f.name; }
   function fmtKm(m) { return m == null ? "–" : (m / 1000).toFixed(1) + " km"; }
 
   function setStatus(html, kind) {
@@ -249,7 +270,7 @@
       var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
         f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
       html += '<article class="card' + (i === 0 ? " best" : "") + '">' +
-        '<div class="row"><span class="rank">' + (i + 1) + '</span><h3>' + esc(f.name) + "</h3>" +
+        '<div class="row"><span class="rank">' + (i + 1) + '</span><h3>' + esc(displayName(f)) + "</h3>" +
         '<span class="time">' + esc(fmtMin(f.time)) + "</span></div>" +
         '<p class="meta">' + esc(fmtKm(f.dist)) + " " + esc(t("byroad")) + " · " + esc(fmtKm(f.straight)) + " " + esc(t("straight")) + "</p>" +
         (f.address ? '<p class="addr">' + esc(f.address) + "</p>" : "") +
@@ -261,7 +282,7 @@
     var reach = state.results.filter(function (f) { return f.time != null; });
     if (!state.pending && reach.length > 1) {
       var nearest = reach.reduce(function (a, b) { return a.straight <= b.straight ? a : b; });
-      if (nearest !== reach[0]) html += '<p class="note">ℹ ' + esc(t("notfastest").replace("{x}", nearest.name)) + "</p>";
+      if (nearest !== reach[0]) html += '<p class="note">ℹ ' + esc(t("notfastest").replace("{x}", displayName(nearest))) + "</p>";
     }
     html += '<p class="muted small">' + esc(t("disclaimer")) + "</p>";
     list.innerHTML = html;
@@ -279,7 +300,7 @@
       bounds.push([f.lat, f.lon]);
       L.marker([f.lat, f.lon], {
         icon: L.divIcon({ className: "pin" + (i === 0 ? " best" : ""), html: String(i + 1), iconSize: [26, 26] }),
-      }).addTo(markerLayer).bindPopup("<b>" + esc(f.name) + "</b><br>" + esc(fmtMin(f.time)));
+      }).addTo(markerLayer).bindPopup("<b>" + esc(displayName(f)) + "</b><br>" + esc(fmtMin(f.time)));
     });
     map.invalidateSize();
     map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17, animate: false });

@@ -65,6 +65,37 @@ def haversine_m(lon1, lat1, lon2, lat2):
     return 2 * r * math.asin(math.sqrt(a))
 
 
+def _norm(name):
+    return re.sub(r"[^a-z0-9ঀ-৿]+", "", (name or "").lower())
+
+
+def same_place(a, b):
+    """Same name (or one name is the start of the other, e.g. "X" and "X, Government hospital, Road, Dhaka")
+    and close together. Mirrors dedupe() in docs/app/app.js."""
+    x, y = _norm(a.name), _norm(b.name)
+    if not x or not y or a.name.startswith("(unnamed)") or b.name.startswith("(unnamed)"):
+        return False
+    d = haversine_m(a.lon, a.lat, b.lon, b.lat)
+    if x == y:
+        return d < 30 or (len(x) >= 12 and d < 300)
+    shorter, longer = sorted((x, y), key=len)
+    return len(shorter) >= 12 and longer.startswith(shorter) and d < 300
+
+
+def dedupe(facilities):
+    """Merge duplicates, keeping the nearer one, the shorter name and any phone number."""
+    out = []
+    for f in facilities:
+        g = next((o for o in out if same_place(o, f)), None)
+        if g is None:
+            out.append(f)
+            continue
+        if len(f.name) < len(g.name):
+            g.name = f.name
+        g.phone = g.phone or f.phone
+    return out
+
+
 def resolve_origin(client, where):
     """Accepts "lat,lon" or free text (English or Bangla)."""
     m = _LATLON.match(where)
@@ -92,8 +123,9 @@ def _to_facility(feature, origin):
     if lon is None or lat is None:
         lon, lat = feature["geometry"]["coordinates"][:2]
     return Facility(
-        # address_line1 is the street for unnamed places, so it is not a name fallback.
-        name=p.get("name") or "(unnamed)",
+        # Prefer the English name (OSM name:en); for unnamed places show the building/street as a hint.
+        name=(((p.get("datasource") or {}).get("raw") or {}).get("name:en") or p.get("name")
+              or ("(unnamed) · " + p["address_line1"] if p.get("address_line1") else "(unnamed)")),
         address=p.get("address_line2") or p.get("formatted") or "",
         lon=lon,
         lat=lat,
@@ -112,6 +144,7 @@ def find_candidates(client, origin, kind, want=MAX_CANDIDATES):
             break
     facilities = [_to_facility(f, origin) for f in features]
     facilities.sort(key=lambda f: f.straight_m)
+    facilities = dedupe(facilities)
     return facilities[:want]
 
 

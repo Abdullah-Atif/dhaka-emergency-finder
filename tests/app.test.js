@@ -55,3 +55,22 @@ test("Bangla and lat,lon detection for suggestions", () => {
   assert.ok(app.isLatLon("23.75, 90.39"));
   assert.ok(!app.isLatLon("Road 27, Dhanmondi"));
 });
+
+test("Dhaka Medical College Hospital point + Bangla-named campus are merged", () => {
+  const out = app.dedupe([
+    { name: "Dhaka Medical College Hospital, Government hospital, Secretariat Rd, Dhaka", nameBn: "", lat: 23.7259, lon: 90.3973 },
+    { name: "Dhaka Medical College Hospital", nameBn: "ঢাকা মেডিক্যাল কলেজ হাসপাতাল", lat: 23.7255, lon: 90.3978 },
+    { name: "Burn & Plastic Surgery Unit, Hospital, Secretariate Road, Dhaka Medical College Hospital, Dhaka", nameBn: "", lat: 23.7257, lon: 90.3980 },
+  ]);
+  assert.strictEqual(out.length, 2);
+  assert.strictEqual(out[0].name, "Dhaka Medical College Hospital");
+  assert.strictEqual(out[0].nameBn, "ঢাকা মেডিক্যাল কলেজ হাসপাতাল");
+});
+
+test("unnamed places are never merged with each other", () => {
+  const out = app.dedupe([
+    { name: "(unnamed) · Road 1", unnamed: true, lat: 23.70, lon: 90.40 },
+    { name: "(unnamed) · Road 1", unnamed: true, lat: 23.70, lon: 90.40 },
+  ]);
+  assert.strictEqual(out.length, 2);
+});

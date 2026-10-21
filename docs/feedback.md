@@ -41,7 +41,11 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
    for OpenStreetMap `emergency=yes`, and `emergency.emergency_ward_entrance` returned 0 results within 15 km of
    central Dhaka. *Suggestion:* expose `emergency=yes/no` on hospitals as a condition (for example
    `emergency_department.yes`).
-7. **Near-duplicate places.** "radda" and "RADDA" (about 5 m apart) are both returned for Mirpur 10.
+7. **Near-duplicate places.** "radda" and "RADDA" (about 5 m apart) are both returned for Mirpur 10. Dhaka Medical
+   College Hospital comes back twice: as a point named "Dhaka Medical College Hospital, Government hospital, Secretariat Rd,
+   Dhaka" (many Dhaka points have the address appended to the name) and as the campus outline named "ঢাকা মেডিক্যাল কলেজ
+   হাসপাতাল" with `name:en`. Both are OpenStreetMap data, but an option to merge near-identical POIs would help
+   every client. Clients also have to read `datasource.raw["name:en"]` themselves to show an English name.
 
 8. **Address Autocomplete returns nothing for partial Bangla text.** `ধানমন্ডি` and `মিরপুর ১০` (with
    `filter=countrycode:bd`, with `lang=bn` or `en`, or with no filter) gave 0 results, while `/geocode/search` with the same text
