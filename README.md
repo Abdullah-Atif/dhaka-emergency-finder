@@ -179,7 +179,7 @@ tests/               unit tests
 - [x] Benchmark: 10 Dhaka locations (English + Bangla pairs). Compare straight-line nearest with travel-time nearest, and measure geocoding success (`python benchmark/run.py`).
 - [x] First recorded agent sessions with full MCP tool-call transcripts ([agent/sessions/](agent/sessions/))
 - [ ] More sessions in Claude Desktop and VS Code Copilot, with screenshots
-- [ ] Tutorial on GitHub Pages + dev.to, with client screenshots
+- [ ] Tutorial on GitHub Pages + dev.to, with client screenshots ([draft](docs/tutorial.md))
 - [ ] Feedback report for Geoapify OpenAPI / MCP
 
 ## License
