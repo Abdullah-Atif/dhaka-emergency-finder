@@ -108,6 +108,17 @@ emergency facilities only, and a 10-location benchmark.
   traffic was not counted. The instructions now require `traffic: "approximated"` for `drive` and `motorcycle`.
 - Session 01 is now labelled clearly in the tutorial as using the JSON-RPC helper `agent/mcp_call.py`.
 
+## 2026-10-21: VS Code + GitHub Copilot session
+
+- Tested the agent in VS Code 1.142 + Copilot Chat 0.70 (Agent mode, Auto model → `gpt-6-luna`):
+  [agent/sessions/03-mirpur-vscode-copilot.md](../agent/sessions/03-mirpur-vscode-copilot.md). It gave the same answer as
+  Claude Code in session 01 and used `traffic: "approximated"` on both calls.
+- **Mistake (mine):** to save time I wrote the Geoapify key directly into the local, git-ignored `.vscode/mcp.json`.
+  The Copilot agent read that file by itself, after a permission prompt, and so sent the key to the model. The local
+  file now uses the `${input:geoapify-key}` prompt from `agent/vscode-mcp.example.json`, and the setup guide warns
+  against inline keys. The key must be replaced.
+- VS Code quirk: pressing Start before the first chat message fails with "Send a message first."
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

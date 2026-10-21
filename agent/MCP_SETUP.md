@@ -20,8 +20,19 @@ Then start `claude` inside this repository. To load the agent instructions, eith
 
 ## VS Code + GitHub Copilot (agent mode)
 
-Copy [`vscode-mcp.example.json`](vscode-mcp.example.json) to `.vscode/mcp.json`.
-VS Code asks for the key the first time and stores it securely.
+Tested with VS Code 1.142 and Copilot Chat 0.70 ([session 03](sessions/03-mirpur-vscode-copilot.md)).
+
+1. Copy [`vscode-mcp.example.json`](vscode-mcp.example.json) to `.vscode/mcp.json`.
+   VS Code asks for the key the first time and stores it securely.
+   **Do not write the key into `mcp.json`:** in our test the Copilot agent read that file by itself and sent its
+   contents to the model. If VS Code asks whether the agent may read `mcp.json` or `.env`, deny it.
+2. Open Chat (`Ctrl+Alt+I`), switch to **Agent** mode, and send your question, for example:
+   `Follow #file:agent/AGENT_INSTRUCTIONS.md and use only the Geoapify tools. I am at Mirpur 10 golchottor. Where is the fastest hospital to reach by car?`
+3. Allow the Geoapify tool calls when asked.
+
+If you press **Start** on the server before sending any chat message, VS Code shows an error: *"Cannot start an MCP
+server before the session runtime has been created. Send a message first."* This is harmless. The server starts
+when you send the first message.
 
 ## Claude Desktop / other clients
 

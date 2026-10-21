@@ -69,8 +69,8 @@ $ claude mcp list
 geoapify: https://api.geoapify.com/v1/mcp (HTTP) - ✔ Connected
 ```
 
-I tested this command with Claude Code 2.1. Setup for VS Code and other clients (not tested by me) is in
-[agent/MCP_SETUP.md](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/MCP_SETUP.md).
+I tested this command with Claude Code 2.1, and I also tested VS Code + GitHub Copilot (session 3 below). Setup for both
+is in [agent/MCP_SETUP.md](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/MCP_SETUP.md).
 
 ### Tell the agent how to behave
 
@@ -123,6 +123,24 @@ way was the agent's own idea.
 
 One gap: my instructions said "rank by travel time" but did not say to use `traffic=approximated`, so the agent used
 free-flow speeds. It told the user so ("traffic not counted; real times will be longer"). The instructions now require it.
+
+### Session 3: the same question in VS Code + GitHub Copilot
+
+Finally I asked the session 1 question again, this time in **VS Code with GitHub Copilot in Agent mode**, which used an
+OpenAI model and VS Code's own MCP client
+([write-up and transcript](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/sessions/03-mirpur-vscode-copilot.md)).
+It made the same 4 Geoapify calls, this time with `traffic: "approximated"` on both the matrix and the route, as the
+updated instructions require. It gave **the same answer as Claude Code in session 1**: AALOK HEALTHCARE, about 2 min, 254 m.
+
+![Copilot's answer in VS Code](images/vscode-copilot-answer.png)
+
+Two surprises worth knowing:
+
+- **Copilot read `.vscode/mcp.json` on its own**, after a permission prompt, and so sent my Geoapify key to the model,
+  because for this test I had written the key straight into that file. A key exposed like this should be replaced. Use VS Code's `inputs` prompt
+  (`${input:geoapify-key}`) instead, and deny file-read requests for config files.
+- Pressing **Start** on the MCP server before sending any chat message fails with *"Send a message first."* Just ask
+  your question; the server starts on its own.
 
 **What worked:** MCP tools take `{lat, lon}` objects everywhere, so the agent never mixed up coordinate order.
 Error messages were precise enough to fix in one retry.
