@@ -108,6 +108,8 @@
       from: "From", min: "min", byroad: "by road", straight: "straight line", noroute: "no route",
       noter: "Name suggests it may not have an emergency department",
       other: "Name suggests this may be a different place (e.g. a mosque inside the compound), not the service itself",
+      unnamedwarn: "No name in the map data: it may be a small clinic or office. Check before going.",
+      showall: "Show all {n} places", showless: "Show top 5",
       notfastest: "The closest on the map ({x}) is not the fastest to reach.",
       callbtn: "Call", navigate: "Navigate", route: "Show route",
       keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
@@ -126,6 +128,8 @@
       from: "যেখান থেকে", min: "মিনিট", byroad: "রাস্তায়", straight: "সোজাসুজি", noroute: "রাস্তা নেই",
       noter: "নাম দেখে মনে হচ্ছে এখানে জরুরি বিভাগ না-ও থাকতে পারে",
       other: "নাম দেখে মনে হচ্ছে এটা অন্য কোনো জায়গা (যেমন প্রাঙ্গণের ভেতরের মসজিদ), সেবাকেন্দ্রটি নিজে নয়",
+      unnamedwarn: "ম্যাপে এর কোনো নাম নেই: এটা ছোট ক্লিনিক বা অফিস হতে পারে। যাওয়ার আগে নিশ্চিত হয়ে নিন।",
+      showall: "সব {n}টি জায়গা দেখুন", showless: "শুধু প্রথম ৫টি দেখুন",
       notfastest: "ম্যাপে সবচেয়ে কাছেরটি ({x}) সবচেয়ে তাড়াতাড়ি পৌঁছানোর নয়।",
       callbtn: "কল", navigate: "নেভিগেট", route: "রাস্তা দেখুন",
       keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
@@ -135,7 +139,7 @@
     },
   };
 
-  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false };
+  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false };
   var map, markerLayer;
   var $ = function (id) { return document.getElementById(id); };
   function t(k) { return T[state.lang][k]; }
@@ -265,7 +269,7 @@
     var html = '<p class="from">' + esc(t("from")) + ": " + esc(o.label) + "</p>";
     if (state.pending) html += '<p class="note">⏳ ' + esc(t("ranking")) + "</p>";
     if (!state.results.length) html += '<p class="muted">' + esc(t("nothing")) + "</p>";
-    state.results.slice(0, 5).forEach(function (f, i) {
+    shown().forEach(function (f, i) {
       var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
       var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
         f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
@@ -274,11 +278,16 @@
         '<span class="time">' + esc(fmtMin(f.time)) + "</span></div>" +
         '<p class="meta">' + esc(fmtKm(f.dist)) + " " + esc(t("byroad")) + " · " + esc(fmtKm(f.straight)) + " " + esc(t("straight")) + "</p>" +
         (f.address ? '<p class="addr">' + esc(f.address) + "</p>" : "") +
-        (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" :
+        (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" :
+          maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" :
           maybeNotER(f.name, f.categories) ? '<p class="warn">⚠ ' + esc(t("noter")) + "</p>" : "") +
         (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
         '<div class="actions"><button class="btn small" data-route="' + i + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div></article>";
     });
+    if (!state.pending && state.results.length > 5) {
+      html += '<button class="btn small more" id="more">' +
+        esc(state.showAll ? t("showless") : t("showall").replace("{n}", state.results.length)) + "</button>";
+    }
     var reach = state.results.filter(function (f) { return f.time != null; });
     if (!state.pending && reach.length > 1) {
       var nearest = reach.reduce(function (a, b) { return a.straight <= b.straight ? a : b; });
@@ -286,17 +295,21 @@
     }
     html += '<p class="muted small">' + esc(t("disclaimer")) + "</p>";
     list.innerHTML = html;
+    var more = $("more");
+    if (more) more.addEventListener("click", function () { state.showAll = !state.showAll; renderResults(); drawMap(); });
     list.querySelectorAll("[data-route]").forEach(function (b) {
       b.addEventListener("click", function () { showRoute(+b.getAttribute("data-route")); });
     });
   }
+
+  function shown() { return state.showAll ? state.results : state.results.slice(0, 5); }
 
   function drawMap() {
     var o = state.origin;
     markerLayer.clearLayers();
     var bounds = [[o.lat, o.lon]];
     L.circleMarker([o.lat, o.lon], { radius: 9, color: "#1565c0", fillOpacity: 0.9 }).addTo(markerLayer);
-    state.results.slice(0, 5).forEach(function (f, i) {
+    shown().forEach(function (f, i) {
       bounds.push([f.lat, f.lon]);
       L.marker([f.lat, f.lon], {
         icon: L.divIcon({ className: "pin" + (i === 0 ? " best" : ""), html: String(i + 1), iconSize: [26, 26] }),
@@ -314,7 +327,7 @@
       if (!feat) return;
       state.routeLayer = L.geoJSON(feat, { style: { color: "#b00020", weight: 5 } }).addTo(map);
       var b = state.routeLayer.getBounds().extend([state.origin.lat, state.origin.lon]);
-      state.results.slice(0, 5).forEach(function (r) { b.extend([r.lat, r.lon]); });
+      shown().forEach(function (r) { b.extend([r.lat, r.lon]); });
       map.fitBounds(b, { padding: [30, 30], maxZoom: 17, animate: false });
       $("map").scrollIntoView({ behavior: "smooth", block: "nearest" });
     }).catch(function () {});
@@ -324,6 +337,7 @@
     if (!apiKey()) { $("keybox").hidden = false; return; }
     setStatus(esc(t("searching")));
     $("results").innerHTML = "";
+    state.showAll = false;
     var mode = state.mode, kind = state.kind;
     originPromise.then(function (origin) {
       if (!origin) { setStatus(esc(t("notfound")), "error"); return null; }

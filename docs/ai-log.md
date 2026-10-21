@@ -165,6 +165,15 @@ emergency facilities only, and a 10-location benchmark.
   interface); merge duplicates when one name is the start of the other (12 or more characters) and they are less than
   300 m apart; never merge unnamed places. Tests added in both languages.
 
+## 2026-10-22: "Searching BUET, why is Kazi Motaher Hossain first and not DMCH?"
+
+- Not a ranking bug: from BUET Teachers' Quarter, DMCH is 338 m in a straight line but the car route is 874 m
+  (Shaheed Minar Road → Sir Syed Road → into the campus), 7.8 min with `traffic=approximated`. The unnamed hospital-tagged
+  building is 486 m / 5.5 min. DMCH ranked #7, and the app only showed 5 results.
+- UX fixes: a "Show all N places" button (all candidates, with their map pins), and a warning on unnamed places
+  ("may be a small clinic or office; check before going"). The ranking itself is unchanged: the app should not
+  silently prefer places it *thinks* are bigger. The real fix needs data: an emergency-department tag (feedback #6).
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.
