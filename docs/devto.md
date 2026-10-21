@@ -87,9 +87,12 @@ Tools alone are not enough. The agent needs rules, especially for an emergency u
 - Rank by **travel time**, not by distance.
 - If geocoding only matched the city, ask for a landmark instead of answering for the city centre.
 
-### A real session
+### Session 1: English, every call logged
 
-I asked: *"I am at Mirpur 10 golchottor. Where is the fastest hospital to reach by car?"* The agent made 6 tool
+I asked: *"I am at Mirpur 10 golchottor. Where is the fastest hospital to reach by car?"* For this first session,
+the agent (Claude Code) called the MCP tools through a tiny JSON-RPC helper,
+[`agent/mcp_call.py`](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/mcp_call.py), so that
+every request and response is logged. The agent decided every call itself; the helper only sends them. It made 6 tool
 calls. The [full transcript](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/sessions/01-mirpur-hospital.md) is in the repository. Here is what happened:
 
 1. `geocode_address` found the Mirpur 10 bus station with `match_type: inner_part` and confidence 1.
@@ -109,11 +112,29 @@ The answer it gave:
 
 That last line is the whole point of the project.
 
+### Session 2: Bangla, inside Claude Code
+
+Then I asked in Bangla, *"আমি ফার্মগেটে আছি, গাড়িতে সবচেয়ে তাড়াতাড়ি কোন হাসপাতালে যেতে পারব?"* ("I am at
+Farmgate. Which hospital can I reach fastest by car?"). This time Claude Code used its **built-in MCP client**, with
+only the Geoapify tools allowed. It took 4 Geoapify calls and 35 seconds
+([write-up and transcript](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/sessions/02-farmgate-claude-code-bangla.md)):
+`geocode_address` → `search_places` (15 places) → `calculate_route_matrix` (10 targets) → `calculate_route` with
+`include_instructions: true`, which was right on the first try this time.
+
+The answer came back in Bangla. It listed Al Razi Hospital Complex first (about 1 min, 401 m, "open 24/7" from the
+place's `opening_hours`). It also put Al Fateh Diagnostics, an eye institute and Brain and Mind Hospital in a separate
+list as "may not be a general hospital". The instructions only ask for a general reminder; sorting the places this
+way was the agent's own idea.
+
+One gap: my instructions said "rank by travel time" but did not say to use `traffic=approximated`, so the agent used
+free-flow speeds. It told the user so ("traffic not counted; real times will be longer"). The instructions now require it.
+
 **What worked:** MCP tools take `{lat, lon}` objects everywhere, so the agent never mixed up coordinate order.
 Error messages were precise enough to fix in one retry.
 
-**What needed a human:** the two mistakes in steps 4 and 5. I added a rule to the instructions: *use the same
-`mode` and `traffic` for the matrix and the route*.
+**What needed a human:** the two mistakes in session 1 (steps 4 and 5), and the missing `traffic` in session 2. Each one
+became a rule in the instructions: *use `traffic: "approximated"` for driving, and the same `mode` and `traffic` for
+the matrix and the route*.
 
 ---
 

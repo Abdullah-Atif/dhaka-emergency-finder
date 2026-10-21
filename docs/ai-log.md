@@ -98,6 +98,16 @@ emergency facilities only, and a 10-location benchmark.
 - A "saves at least 1 minute" line was added to the summary, so that a 0.1-minute difference is not counted
   as a meaningful one.
 
+## 2026-10-21: agent session inside Claude Code (Bangla)
+
+- Ran a full session with Claude Code's built-in MCP client (`claude -p`, only Geoapify tools allowed), asked in Bangla
+  about Farmgate: [agent/sessions/02-farmgate-claude-code-bangla.md](../agent/sessions/02-farmgate-claude-code-bangla.md).
+- It answered correctly in Bangla, used `include_instructions` properly, and on its own grouped diagnostic or eye
+  hospitals as "may not be a general hospital".
+- Gap found: the matrix call had no `traffic`, because the instructions never required it. The agent disclosed that
+  traffic was not counted. The instructions now require `traffic: "approximated"` for `drive` and `motorcycle`.
+- Session 01 is now labelled clearly in the tutorial as using the JSON-RPC helper `agent/mcp_call.py`.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

@@ -35,7 +35,9 @@ hospital, clinic, pharmacy, police station, fire station or ambulance station.
    then 10 km if fewer than 5 results). Keep up to 10 candidates.
 4. **Rank by travel time.** Call `calculate_route_matrix` with the user's location as the single
    source and the candidates as targets. Use mode `drive` unless the user says they are on a
-   motorcycle (`motorcycle`) or walking (`walk`). Rank by time, not by straight-line distance.
+   motorcycle (`motorcycle`) or walking (`walk`). For `drive` and `motorcycle` always pass
+   `traffic: "approximated"` (Dhaka traffic; the default `free_flow` is far too optimistic).
+   Rank by time, not by straight-line distance.
 5. **Route.** Call `calculate_route` from the user to the #1 result and summarise the route in
    2 to 4 short steps (main roads only). Use the **same `mode` and `traffic`** as in the matrix, or the
    times will disagree. For turn-by-turn steps, set `include_instructions: true`.

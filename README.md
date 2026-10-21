@@ -14,7 +14,7 @@ There are two ways to use it:
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
 **Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. The
-10-location benchmark, a recorded agent session, the [tutorial](docs/tutorial.md) and the
+10-location benchmark, two recorded agent sessions, the [tutorial](docs/tutorial.md) and the
 [feedback report for Geoapify](docs/feedback.md) are done (see [Roadmap](#roadmap)).
 
 ## Results (live Geoapify APIs, 2026-10-21)
@@ -29,8 +29,9 @@ From the [10-location Dhaka benchmark](benchmark/results.md) ([manual review](be
 | Silent fallback to the whole city, visible only in `match_type` ("Dhanmondi 27, Dhaka") | 1 of 10, now detected and warned by the CLI. The same place in Bangla (`ধানমন্ডি ২৭`) works. |
 | `"BUET, Dhaka"` / full English name | wrong place (Gulshan / a company in Banani). **`বুয়েট` in Bangla: correct.** |
 
-Recorded AI-agent session with every Geoapify MCP tool call:
-[fastest hospital from Mirpur 10](agent/sessions/01-mirpur-hospital.md)
+Recorded AI-agent sessions with every Geoapify MCP tool call:
+[fastest hospital from Mirpur 10](agent/sessions/01-mirpur-hospital.md) ·
+[asked in Bangla, inside Claude Code](agent/sessions/02-farmgate-claude-code-bangla.md)
 
 ### Sample output
 
