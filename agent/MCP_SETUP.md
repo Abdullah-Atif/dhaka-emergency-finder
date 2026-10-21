@@ -41,5 +41,3 @@ curl -X POST "https://api.geoapify.com/v1/mcp" -H "Content-Type: application/jso
 - "আমি ধানমন্ডি ২৭ এ আছি, সবচেয়ে কাছের ফার্মেসি কোনটা?"
 - "Nearest fire station to 23.7806, 90.4193 by motorcycle?"
 - "Which police station can I reach fastest from Uttara Sector 7?"
-- "মিরপুর ১০ এর কাছে কোন কোন মসজিদ আছে?"
-- "List the temples and churches near Old Dhaka Sadarghat."

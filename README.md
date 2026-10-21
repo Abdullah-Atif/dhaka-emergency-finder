@@ -4,8 +4,6 @@
 
 Find the hospital, pharmacy, police station or fire station in Dhaka that you can **reach fastest**, ranked by real travel time instead of straight-line distance. Your location can be informal text, Bangla script or coordinates.
 
-**Second feature: places of worship and their size.** Find nearby mosques, temples, churches, Buddhist temples and other places of worship, and see how big each one is. The size is the area of its mapped outline, from the Place Details API.
-
 There are two ways to use it:
 
 | | What it is | Geoapify |
@@ -15,24 +13,23 @@ There are two ways to use it:
 
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
-**Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. A first
-20-location benchmark and two recorded agent sessions are done. The tutorial is in progress (see [Roadmap](#roadmap)).
+**Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. The
+10-location benchmark and a recorded agent session are done. The tutorial is in progress (see [Roadmap](#roadmap)).
 
-## First results (live Geoapify APIs, 2026-10-19)
+## Results (live Geoapify APIs, 2026-10-21)
 
-From the [20-location Dhaka benchmark](benchmark/results.md) ([manual review](benchmark/NOTES.md)):
+From the [10-location Dhaka benchmark](benchmark/results.md) ([manual review](benchmark/NOTES.md)):
 
 | Finding | Result |
 |---|---|
-| The nearest hospital **on the map** was **not** the fastest to reach by car | **10 of 16** locations (up to 6.9 min slower) |
-| The fastest "hospital" is, by its name, a diagnostic centre, pharmacy or eye hospital | **6 of 16**, now flagged by the CLI |
-| Geocoding found the right place | **14 of 20**: English 10 / 16, **Bangla 4 / 4** |
-| Silent fallback to the whole city, visible only in `match_type` (e.g. "Dhanmondi 27, Dhaka") | 3 of 20, now detected and warned by the CLI |
+| The nearest hospital **on the map** was **not** the fastest to reach by car | **8 of 9** locations; **at least 1 min** faster in 6 of 9 (up to 6.9 min) |
+| The fastest "hospital" is, by its name, a diagnostic centre or eye hospital | **3 of 9**, now flagged by the CLI |
+| Geocoding found the right place | **8 of 10**: English 4 / 6, **Bangla 4 / 4** |
+| Silent fallback to the whole city, visible only in `match_type` ("Dhanmondi 27, Dhaka") | 1 of 10, now detected and warned by the CLI. The same place in Bangla (`ধানমন্ডি ২৭`) works. |
 | `"BUET, Dhaka"` / full English name | wrong place (Gulshan / a company in Banani). **`বুয়েট` in Bangla: correct.** |
 
-Recorded AI-agent sessions with every Geoapify MCP tool call:
-[hospital near Mirpur 10](agent/sessions/01-mirpur-hospital.md) ·
-[mosques and their size, asked in Bangla](agent/sessions/02-mirpur-mosques-bangla.md)
+Recorded AI-agent session with every Geoapify MCP tool call:
+[fastest hospital from Mirpur 10](agent/sessions/01-mirpur-hospital.md)
 
 ### Sample output
 
@@ -82,18 +79,9 @@ ranked by travel time
 terminal table / JSON / HTML map (Leaflet + Geoapify tiles)
 ```
 
-For places of worship there is one more step:
-
-```
-each result (place_id)
-   │  Place Details API          (no MCP tool yet; see below) features=details,building
-   ▼
-outline polygon → area in m² (MCP equivalent: measure_geometry, operation "area")
-```
-
-The size comes from the place's **own mapped outline** when OpenStreetMap has one. That outline can be a single building or a whole compound, such as the Dhakeshwari temple complex. If the place is only a point inside a bigger building (for example a mosque inside a market), the **containing building** is used and shown as an upper bound (`<=`). If neither exists, the size is reported as unknown. OpenStreetMap has almost no capacity or number-of-floors data for Dhaka, so the size is an area, not a headcount.
-
-> **Why OpenAPI + MCP?** The MCP `search_places` tool returns points only, and there is no MCP tool for place details or building outlines. So an agent alone cannot measure a mosque. The CLI fills this gap with the Place Details REST API.
+> **Why OpenAPI + MCP?** The same task is solved twice: by an AI agent that calls Geoapify MCP tools at run
+> time, and by a small CLI that an AI coding agent wrote from the Geoapify OpenAPI specs. Comparing the two shows
+> where each approach is reliable (see the [agent sessions](agent/sessions/) and the [benchmark](benchmark/)).
 
 | Type (`--type`) | Geoapify category |
 |---|---|
@@ -103,7 +91,6 @@ The size comes from the place's **own mapped outline** when OpenStreetMap has on
 | `police` | `service.police` |
 | `fire` | `service.fire_station` |
 | `ambulance` | `emergency.ambulance_station` |
-| `worship` | `religion.place_of_worship`, or with `--religion islam` → `religion.place_of_worship.islam` (also `hinduism`, `christianity`, `buddhism`, `sikhism`, `judaism`, `multifaith`) |
 
 ## Quick start: CLI
 
@@ -125,15 +112,11 @@ You need Python 3.9 or newer. There are no third-party packages.
    python -m dhaka_emergency "ধানমন্ডি ২৭" --type pharmacy
    python -m dhaka_emergency "23.7806, 90.4193" --type fire --mode motorcycle --map out.html
    python -m dhaka_emergency "Uttara Sector 7" --type police --json
-   python -m dhaka_emergency "Mirpur 10, Dhaka" --type worship --religion islam
-   python -m dhaka_emergency "Dhakeshwari Temple, Dhaka" --type worship --sort size
    ```
 
 | Option | Meaning |
 |---|---|
-| `--type` | `hospital` (default), `clinic`, `pharmacy`, `police`, `fire`, `ambulance`, `worship` |
-| `--religion` | with `worship`: `islam` (mosques), `hinduism` (temples), `christianity`, `buddhism`, `sikhism`, `judaism`, `multifaith` |
-| `--sort` | with `worship`: `time` (default, fastest to reach) or `size` (biggest first) |
+| `--type` | `hospital` (default), `clinic`, `pharmacy`, `police`, `fire`, `ambulance` |
 | `--mode` | `drive` (default), `motorcycle`, `walk` |
 | `--top N` | number of results (default 5) |
 | `--map FILE.html` | write an HTML map with all results and the route to #1 |
@@ -145,7 +128,7 @@ You need Python 3.9 or newer. There are no third-party packages.
 
 1. Connect your AI client to Geoapify MCP: see [agent/MCP_SETUP.md](agent/MCP_SETUP.md) (Claude Code, VS Code, other clients).
 2. Give it the instructions in [agent/AGENT_INSTRUCTIONS.md](agent/AGENT_INSTRUCTIONS.md).
-3. Ask: *"I am at Mirpur 10 golchottor. Where is the fastest hospital to reach by car?"* or *"Which mosques are near Mirpur 10?"*
+3. Ask: *"I am at Mirpur 10 golchottor. Where is the fastest hospital to reach by car?"*
 
 ## Tests
 
@@ -163,7 +146,6 @@ Manual checklist for real API runs:
 - [ ] Each `--type` returns results in central Dhaka
 - [ ] `--map` opens in a browser and shows markers and the route
 - [ ] Missing key → clear error message, exit code 1
-- [ ] `--type worship --religion islam` returns only mosques, each with a size or "size unknown"
 - [ ] `--sort size` lists the biggest first; containing-building sizes are shown with `<=`
 
 ## Repository layout
@@ -188,19 +170,15 @@ tests/               unit tests
   (see [benchmark/NOTES.md](benchmark/NOTES.md)). Bangla script often works better. Otherwise use `lat,lon`.
 - The "not an emergency hospital" flag is a name-based heuristic, not verified data.
 - The tool does not know opening hours, bed availability or emergency capacity.
-- Place-of-worship sizes are mapped areas, not capacity. A mapped outline can be a whole compound, and a containing building can be much bigger than the place itself.
 - Landmark geocoding can be wrong: "BUET, Dhaka" matched a building with "BUET" in its name in Gulshan instead of the BUET campus in Palashi.
 
 ## Roadmap
 
 - [x] CLI: geocode → places → route matrix → ranked list, HTML map, JSON, tests
 - [x] Agent instructions + MCP setup (Claude Code, VS Code)
-- [x] Places of worship (all religions) with size from Place Details, sorted by travel time or size
-- [ ] Size check: compare mapped areas of well-known places (Baitul Mukarram, Dhakeshwari, Armenian Church, ...) with published figures
-- [x] Benchmark: 20 Dhaka locations (English + Bangla). Compare straight-line nearest with travel-time nearest, and measure geocoding success (`python benchmark/run.py`).
+- [x] Benchmark: 10 Dhaka locations (English + Bangla pairs). Compare straight-line nearest with travel-time nearest, and measure geocoding success (`python benchmark/run.py`).
 - [x] First recorded agent sessions with full MCP tool-call transcripts ([agent/sessions/](agent/sessions/))
 - [ ] More sessions in Claude Desktop and VS Code Copilot, with screenshots
-- [ ] Bigger benchmark (more locations, `motorcycle`, Bangla vs English for the same place)
 - [ ] Tutorial on GitHub Pages + dev.to, with client screenshots
 - [ ] Feedback report for Geoapify OpenAPI / MCP
 

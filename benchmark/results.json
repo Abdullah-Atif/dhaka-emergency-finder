@@ -108,51 +108,6 @@
   },
   {
     "id": 5,
-    "query": "Uttara Sector 7, Dhaka",
-    "language": "en",
-    "expected_area": "Uttara|উত্তরা",
-    "geocoded": "Dhaka - Mymensigh Highway, Uttara, Dhaka - 1276, Bangladesh",
-    "result_type": "street",
-    "match_type": "full_match",
-    "confidence": 0,
-    "lat": 23.8641564,
-    "lon": 90.3998921,
-    "area_match": true,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "Uttara Cresent",
-      "min": 2.7,
-      "road_km": 0.77,
-      "straight_km": 0.48,
-      "maybe_not_er": false
-    },
-    "map_nearest": {
-      "name": "Millennium Orthopaedic Hospital, Hospital",
-      "min": 9.2,
-      "road_km": 2.8,
-      "straight_km": 0.3
-    },
-    "nearest_is_fastest": false,
-    "minutes_saved": 6.6,
-    "detour_ratio": 1.61
-  },
-  {
-    "id": 6,
-    "query": "Gulshan 1 Circle, Dhaka",
-    "language": "en",
-    "expected_area": "Gulshan|গুলশান",
-    "geocoded": "Dhaka, DH, Bangladesh",
-    "result_type": "city",
-    "match_type": "match_by_city_or_disrict",
-    "confidence": 0.5,
-    "lat": 23.7104,
-    "lon": 90.40744,
-    "area_match": false,
-    "coarse": true
-  },
-  {
-    "id": 7,
     "query": "Farmgate, Dhaka",
     "language": "en",
     "expected_area": "Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট",
@@ -183,7 +138,7 @@
     "detour_ratio": 1.04
   },
   {
-    "id": 8,
+    "id": 6,
     "query": "ফার্মগেট",
     "language": "bn",
     "expected_area": "Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট",
@@ -214,114 +169,7 @@
     "detour_ratio": 0.99
   },
   {
-    "id": 9,
-    "query": "Motijheel Shapla Chattar, Dhaka",
-    "language": "en",
-    "expected_area": "Motijheel|মতিঝিল",
-    "geocoded": "Dhaka, DH, Bangladesh",
-    "result_type": "city",
-    "match_type": "match_by_city_or_disrict",
-    "confidence": 0.5,
-    "lat": 23.7104,
-    "lon": 90.40744,
-    "area_match": false,
-    "coarse": true
-  },
-  {
-    "id": 10,
-    "query": "Old Dhaka Chawkbazar",
-    "language": "en",
-    "expected_area": "Chawkbazar|Chowk Bazar|Chalk Bazar|চকবাজার",
-    "geocoded": "Old Masjid (mosque), Banani Foot Over Brg., Gulshan, Dhaka - 2467, Bangladesh",
-    "result_type": "amenity",
-    "match_type": "full_match",
-    "confidence": 0,
-    "lat": 23.7915539,
-    "lon": 90.4003758,
-    "area_match": false,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "Square hospital Consultation and Diagnostic centre",
-      "min": 5.4,
-      "road_km": 1.09,
-      "straight_km": 0.13,
-      "maybe_not_er": true
-    },
-    "map_nearest": {
-      "name": "Square hospital Consultation and Diagnostic centre",
-      "min": 5.4,
-      "road_km": 1.09,
-      "straight_km": 0.13
-    },
-    "nearest_is_fastest": true,
-    "minutes_saved": 0.0,
-    "detour_ratio": 8.34
-  },
-  {
-    "id": 11,
-    "query": "Mohammadpur Town Hall, Dhaka",
-    "language": "en",
-    "expected_area": "Mohammadpur|মোহাম্মদপুর",
-    "geocoded": "Mohammadpur Town Hall Market, Asad Avenue, Mohammadpur, Dhaka - 1207, Bangladesh",
-    "result_type": "amenity",
-    "match_type": "full_match",
-    "confidence": 0,
-    "lat": 23.7599623,
-    "lon": 90.3661778,
-    "area_match": true,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "Ahammed Pharma",
-      "min": 2.2,
-      "road_km": 0.3,
-      "straight_km": 0.18,
-      "maybe_not_er": true
-    },
-    "map_nearest": {
-      "name": "Ahammed Pharma",
-      "min": 2.2,
-      "road_km": 0.3,
-      "straight_km": 0.18
-    },
-    "nearest_is_fastest": true,
-    "minutes_saved": 0.0,
-    "detour_ratio": 1.69
-  },
-  {
-    "id": 12,
-    "query": "Badda Link Road, Dhaka",
-    "language": "en",
-    "expected_area": "Badda|বাড্ডা",
-    "geocoded": "Merul Badda Bus Stop - Hatirjheel Circular Bus, Hatirjheel Link Road, Gulshan, Dhaka - 1029, Bangladesh",
-    "result_type": "amenity",
-    "match_type": "inner_part",
-    "confidence": 0,
-    "lat": 23.7703817,
-    "lon": 90.4228747,
-    "area_match": true,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "(unnamed)",
-      "min": 10.3,
-      "road_km": 2.27,
-      "straight_km": 1.28,
-      "maybe_not_er": false
-    },
-    "map_nearest": {
-      "name": "AIMS Hospital",
-      "min": 12.4,
-      "road_km": 2.89,
-      "straight_km": 0.45
-    },
-    "nearest_is_fastest": false,
-    "minutes_saved": 2.2,
-    "detour_ratio": 1.77
-  },
-  {
-    "id": 13,
+    "id": 7,
     "query": "Jatrabari Chowrasta, Dhaka",
     "language": "en",
     "expected_area": "Jatrabari|যাত্রাবাড়ী",
@@ -352,15 +200,7 @@
     "detour_ratio": 1.56
   },
   {
-    "id": 14,
-    "query": "Bashundhara R/A Block D, Dhaka",
-    "language": "en",
-    "expected_area": "Bashundhara|বসুন্ধরা",
-    "geocoded": null,
-    "area_match": false
-  },
-  {
-    "id": 15,
+    "id": 8,
     "query": "Keraniganj, Dhaka",
     "language": "en",
     "expected_area": "Keraniganj|কেরানীগঞ্জ",
@@ -391,69 +231,7 @@
     "detour_ratio": 1.3
   },
   {
-    "id": 16,
-    "query": "Kamrangirchar, Dhaka",
-    "language": "en",
-    "expected_area": "Kamrangirchar|কামরাঙ্গীরচর",
-    "geocoded": "Kamrangirchar Thana, Asrafabad Main Road, Kamrangirchor, Dhaka - 1312, Bangladesh",
-    "result_type": "amenity",
-    "match_type": "full_match",
-    "confidence": 0.6,
-    "lat": 23.7097293,
-    "lon": 90.3674657,
-    "area_match": true,
-    "coarse": false,
-    "candidates": 9,
-    "fastest": {
-      "name": "Riverside Hospital",
-      "min": 0.5,
-      "road_km": 0.07,
-      "straight_km": 0.03,
-      "maybe_not_er": false
-    },
-    "map_nearest": {
-      "name": "Riverside Hospital",
-      "min": 0.5,
-      "road_km": 0.07,
-      "straight_km": 0.03
-    },
-    "nearest_is_fastest": true,
-    "minutes_saved": 0.0,
-    "detour_ratio": 2.26
-  },
-  {
-    "id": 17,
-    "query": "Banani Road 11, Dhaka",
-    "language": "en",
-    "expected_area": "Banani|বনানী",
-    "geocoded": "Kareem's Dhaka, Road 11, Gulshan, Dhaka - 1213, Bangladesh",
-    "result_type": "amenity",
-    "match_type": "inner_part",
-    "confidence": 0.6666666666666667,
-    "lat": 23.7910699,
-    "lon": 90.401583,
-    "area_match": false,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "Square hospital Consultation and Diagnostic centre",
-      "min": 0.0,
-      "road_km": 0.0,
-      "straight_km": 0.0,
-      "maybe_not_er": true
-    },
-    "map_nearest": {
-      "name": "Square hospital Consultation and Diagnostic centre",
-      "min": 0.0,
-      "road_km": 0.0,
-      "straight_km": 0.0
-    },
-    "nearest_is_fastest": true,
-    "minutes_saved": 0.0,
-    "detour_ratio": 0.6
-  },
-  {
-    "id": 18,
+    "id": 9,
     "query": "BUET, Dhaka",
     "language": "en",
     "expected_area": "Palashi|Lalbagh|Bokshibazar|Bakshibazar|Azimpur|Shahbag|Ramna",
@@ -484,38 +262,7 @@
     "detour_ratio": 1.32
   },
   {
-    "id": 19,
-    "query": "Shahbag, Dhaka",
-    "language": "en",
-    "expected_area": "Shahbag|Shahbagh|শাহবাগ",
-    "geocoded": "Shahbag, Dhaka - 1000, Bangladesh",
-    "result_type": "city",
-    "match_type": "full_match",
-    "confidence": 0.5,
-    "lat": 23.738,
-    "lon": 90.4,
-    "area_match": true,
-    "coarse": false,
-    "candidates": 10,
-    "fastest": {
-      "name": "Shahbagh P.G. Hospital",
-      "min": 4.3,
-      "road_km": 1.0,
-      "straight_km": 0.3,
-      "maybe_not_er": false
-    },
-    "map_nearest": {
-      "name": "Shahbagh P.G. Hospital",
-      "min": 4.3,
-      "road_km": 1.0,
-      "straight_km": 0.3
-    },
-    "nearest_is_fastest": true,
-    "minutes_saved": 0.0,
-    "detour_ratio": 3.29
-  },
-  {
-    "id": 20,
+    "id": 10,
     "query": "বসুন্ধরা সিটি",
     "language": "bn",
     "expected_area": "Panthapath|Kathalbagan|Karwan|Kawran|Tejgaon|পান্থপথ",

@@ -95,6 +95,8 @@ def to_markdown(results):
         "(city-level fallbacks excluded)",
     ]
     if saved:
+        big = [s for s in saved if s >= 1]
+        lines.append(f"  - of these, the fastest one saves **at least 1 minute** in {len(big)} / {len(ranked)}")
         lines.append(f"- **When they differ, the fastest one saves** {min(saved)} to {max(saved)} min "
                      f"(average {sum(saved) / len(saved):.1f} min) by car")
     lines.append(f"- **The fastest \"hospital\" is likely not an emergency hospital** (diagnostic centre, pharmacy, "

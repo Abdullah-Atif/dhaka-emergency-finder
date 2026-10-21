@@ -1,21 +1,11 @@
 id,query,language,expected_area,note
 1,"Mirpur 10 Golchattar, Dhaka",en,Mirpur|মিরপুর,informal roundabout name
-2,"মিরপুর ১০ গোলচত্বর, ঢাকা",bn,Mirpur|মিরপুর,same place in Bangla
-3,"Dhanmondi 27, Dhaka",en,Dhanmondi|ধানমন্ডি,road number as area name
-4,"ধানমন্ডি ২৭",bn,Dhanmondi|ধানমন্ডি,Bangla digits
-5,"Uttara Sector 7, Dhaka",en,Uttara|উত্তরা,sector-based address
-6,"Gulshan 1 Circle, Dhaka",en,Gulshan|গুলশান,circle name
-7,"Farmgate, Dhaka",en,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,busy junction
-8,"ফার্মগেট",bn,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,Bangla only
-9,"Motijheel Shapla Chattar, Dhaka",en,Motijheel|মতিঝিল,commercial area
-10,"Old Dhaka Chawkbazar",en,Chawkbazar|Chowk Bazar|Chalk Bazar|চকবাজার,dense old city
-11,"Mohammadpur Town Hall, Dhaka",en,Mohammadpur|মোহাম্মদপুর,landmark
-12,"Badda Link Road, Dhaka",en,Badda|বাড্ডা,road name
-13,"Jatrabari Chowrasta, Dhaka",en,Jatrabari|যাত্রাবাড়ী,informal junction name
-14,"Bashundhara R/A Block D, Dhaka",en,Bashundhara|বসুন্ধরা,residential block
-15,"Keraniganj, Dhaka",en,Keraniganj|কেরানীগঞ্জ,across the Buriganga river
-16,"Kamrangirchar, Dhaka",en,Kamrangirchar|কামরাঙ্গীরচর,river-bounded area
-17,"Banani Road 11, Dhaka",en,Banani|বনানী,road number
-18,"BUET, Dhaka",en,Palashi|Lalbagh|Bokshibazar|Bakshibazar|Azimpur|Shahbag|Ramna,university landmark (campus is at Palashi)
-19,"Shahbag, Dhaka",en,Shahbag|Shahbagh|শাহবাগ,hospital cluster nearby
-20,"বসুন্ধরা সিটি",bn,Panthapath|Kathalbagan|Karwan|Kawran|Tejgaon|পান্থপথ,shopping mall landmark (at Panthapath) in Bangla
+2,"মিরপুর ১০ গোলচত্বর, ঢাকা",bn,Mirpur|মিরপুর,same place as #1 in Bangla
+3,"Dhanmondi 27, Dhaka",en,Dhanmondi|ধানমন্ডি,road number used as an area name
+4,"ধানমন্ডি ২৭",bn,Dhanmondi|ধানমন্ডি,same place as #3 in Bangla (Bangla digits)
+5,"Farmgate, Dhaka",en,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,busy junction
+6,"ফার্মগেট",bn,Farmgate|Tejgaon|Karwan|Kawran|ফার্মগেট,same place as #5 in Bangla only
+7,"Jatrabari Chowrasta, Dhaka",en,Jatrabari|যাত্রাবাড়ী,informal junction name
+8,"Keraniganj, Dhaka",en,Keraniganj|কেরানীগঞ্জ,across the Buriganga river
+9,"BUET, Dhaka",en,Palashi|Lalbagh|Bokshibazar|Bakshibazar|Azimpur|Shahbag|Ramna,university abbreviation (campus is at Palashi)
+10,"বসুন্ধরা সিটি",bn,Panthapath|Kathalbagan|Karwan|Kawran|Tejgaon|পান্থপথ,shopping mall landmark (at Panthapath) in Bangla

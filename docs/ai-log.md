@@ -43,6 +43,11 @@ All four live checks worked on the first try. The agent-written client needed no
 
 Request: show nearby mosques and how big each one is, and do the same for every religion.
 
+> **Update 2026-10-21:** at Geoapify's request, the agreed Batch #2 scope is emergency facilities only, so this
+> feature was removed from `main`. The code, tests and the recorded mosque session are kept on the branch
+> [`feature/places-of-worship`](https://github.com/Abdullah-Atif/dhaka-emergency-finder/tree/feature/places-of-worship).
+> The findings below still count as feedback: the MCP `search_places` tool returns points only.
+
 What was checked against the live API before writing code:
 - The Places spec has `religion.place_of_worship` with subcategories `islam`, `hinduism`,
   `christianity`, `buddhism`, `sikhism`, `judaism`, `multifaith`, `shinto`.
@@ -79,6 +84,19 @@ Ideas for the benchmark:
   ([agent/sessions/](../agent/sessions/)). The agent made two mistakes there, which are kept in the transcript:
   `geometry_scope=steps` without `include_instructions`, and forgetting `traffic` on `calculate_route`, which
   made route and matrix times disagree. The agent instructions were updated after each one.
+
+## 2026-10-21: scope agreed with Geoapify
+
+Geoapify selected the project for Batch #2 (deadline 2026-11-15) and asked for a smaller first version:
+emergency facilities only, and a 10-location benchmark.
+
+- The places-of-worship feature was moved to the branch `feature/places-of-worship` and removed from `main`
+  (code, tests, docs, and the mosque agent session).
+- The benchmark set was cut from 20 to 10 locations. It keeps the English/Bangla pairs for the same places
+  and the problem cases. Re-run result: map-nearest ≠ fastest in 8 / 9 (at least 1 min faster in 6 / 9);
+  geocoding 8 / 10 (Bangla 4 / 4). The 20-location run stays in the git history (commit `3392669`).
+- A "saves at least 1 minute" line was added to the summary, so that a 0.1-minute difference is not counted
+  as a meaningful one.
 
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short

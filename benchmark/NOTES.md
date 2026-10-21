@@ -1,24 +1,25 @@
-# Benchmark notes: manual review (2026-10-19)
+# Benchmark notes: manual review
 
-[results.md](results.md) is generated automatically. This file reviews every geocoding mismatch by hand.
-It also records follow-up queries that test whether a different wording fixes the problem.
+[results.md](results.md) is generated automatically by `python benchmark/run.py` (10 locations, run 2026-10-21).
+This file reviews every geocoding mismatch by hand and records follow-up queries that test whether a
+different wording fixes the problem.
+
+A first exploratory run used 20 locations (2026-10-19, commit `3392669`). The agreed Batch #2 scope is 10
+locations, so the set was cut to 10. Pairs of the same place in English and Bangla were kept, together with
+the cases that showed problems. Some follow-up queries below come from that first run.
 
 ## Manual verdict per mismatch
 
 | # | Query | Geocoded to | Verdict |
 |---|---|---|---|
 | 3 | Dhanmondi 27, Dhaka | Dhaka (city only) | **Wrong.** Silent city-level fallback. The same place in Bangla (#4, `ধানমন্ডি ২৭`) worked. |
-| 6 | Gulshan 1 Circle, Dhaka | Dhaka (city only) | **Wrong.** City-level fallback. |
-| 9 | Motijheel Shapla Chattar, Dhaka | Dhaka (city only) | **Wrong.** City-level fallback. |
-| 10 | Old Dhaka Chawkbazar | "Old Masjid", Banani | **Wrong.** It matched the word "Old" in a mosque name about 10 km away. |
-| 14 | Bashundhara R/A Block D, Dhaka | (not found) | **Wrong.** The abbreviation "R/A" (Residential Area) is not understood. See the follow-ups. |
-| 17 | Banani Road 11, Dhaka | Kareem's, Road 11, Gulshan, Dhaka 1213 | **Probably correct.** Postcode 1213 is Banani, and Banani is inside Gulshan thana, so the automatic keyword check gave a false "no". |
-| 18 | BUET, Dhaka | "BUET-TPHS Building", Gulshan | **Wrong.** It matched a building that has "BUET" in its name about 8 km away from the campus in Palashi. |
+| 9 | BUET, Dhaka | "BUET-TPHS Building", Gulshan | **Wrong.** It matched a building that has "BUET" in its name about 8 km away from the campus in Palashi. |
 
-The automatic check also accepted #12 "Badda Link Road" (geocoded to Merul Badda bus stop on Hatirjheel Link
-Road). That is in the right part of the city, so it is counted as correct.
+**Corrected score: 8 / 10 correct** (English 4 / 6, Bangla 4 / 4). The automatic check agrees with the manual review.
 
-**Corrected score: 14 / 20 correct** (English 10 / 16, Bangla 4 / 4).
+Note on the travel-time table: #9 was ranked around the *wrong* geocoded point in Gulshan. The comparison of
+"nearest on the map vs. fastest" is still valid for that point, but it is not about BUET. #3 (city-level
+fallback) is excluded from the travel-time statistics.
 
 ## Follow-up: does a different wording help? (live, same day)
 
@@ -46,7 +47,7 @@ Road). That is in the right part of the city, so it is counted as correct.
    instead of 1, Khilkhet instead of Motijheel) came back as `full_match`. A client cannot detect those
    from the response alone.
 3. **Common Dhaka abbreviations are not understood**: "R/A" (Residential Area), and "Circle 1" / "1 Circle".
-4. **The "hospital" category needs filtering in Dhaka.** In 6 of 16 locations the fastest "hospital" is, by its
+4. **The "hospital" category needs filtering in Dhaka.** In 3 of 9 locations (6 of 16 in the first 20-location run) the fastest "hospital" is, by its
    name, a diagnostic centre, pharmacy, eye hospital or similar. The CLI now flags these.
 
 ## Feedback for Geoapify (draft)
