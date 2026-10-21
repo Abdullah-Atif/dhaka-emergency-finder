@@ -43,7 +43,11 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
    `emergency_department.yes`).
 7. **Near-duplicate places.** "radda" and "RADDA" (about 5 m apart) are both returned for Mirpur 10.
 
-8. **Key restrictions do not reject requests without the header.** A key limited to Origin
+8. **Address Autocomplete returns nothing for partial Bangla text.** `ধানমন্ডি` and `মিরপুর ১০` (with
+   `filter=countrycode:bd`, with `lang=bn` or `en`, or with no filter) gave 0 results, while `/geocode/search` with the same text
+   found Dhanmondi. Only a longer phrase (`ধানমন্ডি ২৭`) gave one result. The web app works around it by falling back to
+   search for Bangla input.
+9. **Key restrictions do not reject requests without the header.** A key limited to Origin
    `^https://abdullah-atif\.github\.io$` and a matching Referer returned **401** for another site's Origin, but
    **200** for a plain request that sent neither header (tested with curl). So a browser key copied from a public
    page still works from any script or server. *Suggestion:* an option such as "require a matching Origin or

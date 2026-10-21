@@ -230,6 +230,12 @@ What it does differently from a plain "nearest hospital" search:
 
 - **A big "tap to call 999" button at the top**, before anything else.
 - **📍 Use my location** starts the search right away, and looks up the street address in parallel.
+- **Suggestions while you type**, like Google Maps, from the Geoapify
+  [Address Autocomplete API](https://apidocs.geoapify.com/docs/geocoding/address-autocomplete/). One catch: Autocomplete
+  returned **nothing** for partial Bangla words ("ধানমন্ডি", "মিরপুর ১০"), while the regular search found them. So for Bangla
+  text the app falls back to `/geocode/search`.
+
+  ![Suggestions while typing "dhanmo"](images/app-suggestions.jpg)
 - **Results appear in two steps.** The 10 nearest places show by distance after the Places call (1.6 s in one test on a
   good connection; it depends on the network); they are re-sorted by travel time when the Route Matrix answers, and the route to #1 is drawn on the map.
 - **The same warnings as the CLI:** city-level geocoding fallback, "hospitals" whose name says diagnostic centre or eye

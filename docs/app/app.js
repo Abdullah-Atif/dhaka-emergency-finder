@@ -70,7 +70,11 @@
     return out;
   }
 
-  var helpers = { haversineM: haversineM, maybeNotER: maybeNotER, isCoarse: isCoarse,
+  // Geoapify Autocomplete returns nothing for partial Bangla words ("ধানমন্ডি"), while /geocode/search finds them.
+  function isBangla(text) { return /[\u0980-\u09ff]/.test(text || ""); }
+  function isLatLon(text) { return /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(text || ""); }
+
+  var helpers = { isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, maybeNotER: maybeNotER, isCoarse: isCoarse,
                   rankByTime: rankByTime, dedupe: dedupe, maybeOtherPlace: maybeOtherPlace, CATEGORIES: CATEGORIES };
   if (typeof module !== "undefined" && module.exports) { module.exports = helpers; return; }
 
@@ -143,6 +147,21 @@
     return getJSON(q).then(function (d) {
       var h = (d.results || [])[0];
       return h ? { lat: h.lat, lon: h.lon, label: h.formatted, coarse: isCoarse(h) } : null;
+    });
+  }
+
+  function suggest(text) {
+    var common = "&format=json&limit=5&lang=en&filter=countrycode:bd&bias=proximity:" + DHAKA.lon + "," + DHAKA.lat +
+      "&text=" + encodeURIComponent(text);
+    function toItems(d) {
+      return (d.results || []).map(function (h) {
+        return { main: h.address_line1 || h.formatted, sub: h.address_line2 || "", lat: h.lat, lon: h.lon,
+                 label: h.formatted, coarse: isCoarse(h) };
+      });
+    }
+    return getJSON("https://api.geoapify.com/v1/geocode/autocomplete?" + common.slice(1)).then(toItems).then(function (items) {
+      if (items.length || !isBangla(text)) return items;
+      return getJSON("https://api.geoapify.com/v1/geocode/search?" + common.slice(1)).then(toItems);
     });
   }
 
@@ -337,9 +356,56 @@
         document.querySelectorAll("[data-mode]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
       });
     });
+    var sug = { items: [], active: -1, seq: 0, timer: null };
+    var input = $("where-input"), list = $("suggest");
+    function closeSuggest() { list.hidden = true; list.innerHTML = ""; sug.items = []; sug.active = -1; input.setAttribute("aria-expanded", "false"); }
+    function pick(i) {
+      var it = sug.items[i];
+      if (!it) return;
+      input.value = it.label;
+      closeSuggest();
+      run(Promise.resolve({ lat: it.lat, lon: it.lon, label: it.label, coarse: it.coarse }));
+    }
+    function renderSuggest() {
+      list.innerHTML = sug.items.map(function (it, i) {
+        return '<li role="option" id="sug-' + i + '" data-i="' + i + '"' + (i === sug.active ? ' aria-selected="true"' : "") + ">" +
+          '<span class="s-main">' + esc(it.main) + '</span><span class="s-sub">' + esc(it.sub) + "</span></li>";
+      }).join("");
+      list.hidden = !sug.items.length;
+      input.setAttribute("aria-expanded", String(!!sug.items.length));
+      if (sug.active >= 0) input.setAttribute("aria-activedescendant", "sug-" + sug.active);
+      else input.removeAttribute("aria-activedescendant");
+    }
+    input.addEventListener("input", function () {
+      clearTimeout(sug.timer);
+      var text = input.value.trim();
+      if (text.length < 3 || isLatLon(text) || !apiKey()) { closeSuggest(); return; }
+      var mySeq = ++sug.seq;
+      sug.timer = setTimeout(function () {
+        suggest(text).then(function (items) {
+          if (mySeq !== sug.seq) return; // a newer keystroke won
+          sug.items = items; sug.active = -1; renderSuggest();
+        }).catch(function () {});
+      }, 300);
+    });
+    input.addEventListener("keydown", function (e) {
+      if (list.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); sug.active = Math.min(sug.active + 1, sug.items.length - 1); renderSuggest(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); sug.active = Math.max(sug.active - 1, -1); renderSuggest(); }
+      else if (e.key === "Enter" && sug.active >= 0) { e.preventDefault(); pick(sug.active); }
+      else if (e.key === "Escape") { closeSuggest(); }
+    });
+    // mousedown fires before the input loses focus, so the click is not lost
+    list.addEventListener("mousedown", function (e) {
+      var li = e.target.closest("li[data-i]");
+      if (li) { e.preventDefault(); pick(+li.getAttribute("data-i")); }
+    });
+    input.addEventListener("blur", function () { setTimeout(closeSuggest, 150); });
+
     $("search").addEventListener("submit", function (e) {
       e.preventDefault();
-      var text = $("where-input").value.trim();
+      sug.seq++; clearTimeout(sug.timer); closeSuggest();
+      var text = input.value.trim();
       if (text) run(geocode(text));
     });
     $("myloc").addEventListener("click", function () {

@@ -29,8 +29,16 @@
   h1 { font-size: 1.25rem; margin: 0; }
   label.h { display: block; font-weight: 600; margin: 14px 0 6px; }
   .search { display: flex; gap: 8px; }
+  .field { position: relative; flex: 1; min-width: 0; display: flex; }
   input[type=text] { flex: 1; min-width: 0; padding: 12px; border-radius: 8px; border: 1px solid var(--line);
                      background: var(--card); color: var(--text); font-size: 1rem; }
+  #suggest { position: absolute; top: 100%; left: 0; right: 0; z-index: 1100; margin: 4px 0 0; padding: 4px 0;
+             list-style: none; background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+             box-shadow: 0 6px 18px rgba(0,0,0,.18); max-height: 60vh; overflow-y: auto; }
+  #suggest li { padding: 9px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+  #suggest li[aria-selected=true], #suggest li:hover { background: var(--chip); }
+  .s-main { font-weight: 600; overflow-wrap: anywhere; }
+  .s-sub { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
   .btn { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 8px;
          padding: 10px 14px; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; }
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
@@ -85,7 +93,11 @@
 
   <label class="h" for="where-input" data-t="where">Where are you?</label>
   <form class="search" id="search">
-    <input type="text" id="where-input" autocomplete="off">
+    <div class="field">
+      <input type="text" id="where-input" autocomplete="off" role="combobox" aria-autocomplete="list"
+             aria-controls="suggest" aria-expanded="false">
+      <ul id="suggest" role="listbox" hidden></ul>
+    </div>
     <button class="btn primary" data-t="find">Find fastest</button>
   </form>
   <button class="btn myloc" id="myloc">📍 <span data-t="myloc">Use my location</span></button>

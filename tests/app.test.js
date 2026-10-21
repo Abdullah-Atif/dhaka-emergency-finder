@@ -48,3 +48,10 @@ test("a mosque tagged as a fire station is flagged as a different place", () => 
   assert.ok(!app.maybeOtherPlace("Lalbagh Fire Station"));
   assert.ok(!app.maybeOtherPlace("Fire Service & Civil Defence Headquarter"));
 });
+
+test("Bangla and lat,lon detection for suggestions", () => {
+  assert.ok(app.isBangla("ধানমন্ডি"));
+  assert.ok(!app.isBangla("Dhanmondi"));
+  assert.ok(app.isLatLon("23.75, 90.39"));
+  assert.ok(!app.isLatLon("Road 27, Dhanmondi"));
+});

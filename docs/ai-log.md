@@ -145,6 +145,15 @@ emergency facilities only, and a 10-location benchmark.
   [feedback.md](feedback.md). The original key (used by the CLI and MCP setups) was left unrestricted, because
   command-line requests send no Origin.
 
+## 2026-10-22: suggestions while typing
+
+- User request: "like Google Maps, show suggestions while I type". Added Geoapify Address Autocomplete to the web app
+  (300 ms debounce, minimum 3 characters, ignores stale responses, keyboard ↑/↓/Enter/Esc, ARIA combobox).
+- Tested the API first: English partial words work well and quickly ("dhanmo" → 5 Dhanmondi places in about 0.6 s), but
+  **partial Bangla words return nothing**, whatever the `lang` or filter. Fallback: Bangla text → `/geocode/search`.
+  Verified in the browser: "dhanmo" → 5 suggestions, ↓ + Enter picks one and runs the search; "ধানমন্ডি" → 2
+  suggestions through the fallback.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.
