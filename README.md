@@ -8,13 +8,14 @@ There are two ways to use it:
 
 | | What it is | Geoapify |
 |---|---|---|
-| **AI agent** | Ask in plain English or Bangla in Claude Code, Claude Desktop or VS Code Copilot | [Geoapify MCP](https://apidocs.geoapify.com/mcp/) tools |
+| **AI agent** | Ask in plain English or Bangla in an MCP client such as Claude Code (tested), Claude Desktop or VS Code Copilot | [Geoapify MCP](https://apidocs.geoapify.com/mcp/) tools |
 | **CLI** | `python -m dhaka_emergency "Mirpur 10"`, built with an AI coding agent from the specs | [Geoapify OpenAPI specs](https://apidocs.geoapify.com/open-api/) → REST APIs |
 
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
 **Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. The
-10-location benchmark and a recorded agent session are done. The tutorial is in progress (see [Roadmap](#roadmap)).
+10-location benchmark, a recorded agent session, the [tutorial](docs/tutorial.md) and the
+[feedback report for Geoapify](docs/feedback.md) are done (see [Roadmap](#roadmap)).
 
 ## Results (live Geoapify APIs, 2026-10-21)
 
@@ -155,6 +156,8 @@ dhaka_emergency/     CLI package (geoapify.py = REST client, finder.py = logic, 
 agent/               agent instructions + MCP setup for AI clients
 prompts/             prompts given to the AI coding agent, with corrections
 docs/ai-log.md       what worked, what needed human guidance
+docs/tutorial.md     the tutorial (served by GitHub Pages; docs/devto.md is the dev.to copy)
+docs/feedback.md     feedback for Geoapify OpenAPI specs and MCP tools
 benchmark/           Dhaka test locations, runner (run.py), results and manual review notes
 agent/sessions/      recorded agent sessions: write-up (.md) + full MCP transcript (.jsonl)
 agent/mcp_call.py    call one Geoapify MCP tool over JSON-RPC and log it (for agents without an MCP client)
@@ -178,9 +181,8 @@ tests/               unit tests
 - [x] Agent instructions + MCP setup (Claude Code, VS Code)
 - [x] Benchmark: 10 Dhaka locations (English + Bangla pairs). Compare straight-line nearest with travel-time nearest, and measure geocoding success (`python benchmark/run.py`).
 - [x] First recorded agent sessions with full MCP tool-call transcripts ([agent/sessions/](agent/sessions/))
-- [ ] More sessions in Claude Desktop and VS Code Copilot, with screenshots
-- [ ] Tutorial on GitHub Pages + dev.to, with client screenshots ([draft](docs/tutorial.md))
-- [ ] Feedback report for Geoapify OpenAPI / MCP
+- [x] [Tutorial](docs/tutorial.md) (GitHub Pages; dev.to copy in [docs/devto.md](docs/devto.md))
+- [x] [Feedback report for Geoapify OpenAPI / MCP](docs/feedback.md)
 
 ## License
 

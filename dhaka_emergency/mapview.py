@@ -37,12 +37,19 @@ data.places.forEach((p, i) => {{
   L.marker([p.lat, p.lon]).addTo(map)
     .bindPopup('<b>#' + (i + 1) + ' ' + p.name + '</b><br>' + mins + '<br>' + p.address + (p.phone ? '<br>' + p.phone : ''));
 }});
+let all = L.latLngBounds(bounds);
 if (data.route) {{
   const layer = L.geoJSON(data.route, {{style: {{color: '#b00020', weight: 5}}}}).addTo(map);
-  map.fitBounds(layer.getBounds().extend(L.latLngBounds(bounds)), {{padding: [40, 40]}});
-}} else {{
-  map.fitBounds(bounds, {{padding: [40, 40]}});
+  all = layer.getBounds().extend(all);
 }}
+// Fit again once the page has its final size: fitting a 0-size container zooms to the maximum.
+function fit() {{
+  map.invalidateSize();
+  map.fitBounds(all, {{padding: [40, 40], animate: false}});
+}}
+fit();
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
 </script>
 </body>
 </html>

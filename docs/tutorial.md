@@ -1,10 +1,3 @@
-<!--
-DRAFT v0.1 (2026-10-21). Still to do before publishing:
-  - screenshots: Claude Code with Geoapify MCP connected, VS Code Copilot setup, HTML map output (hide API keys)
-  - test the `claude mcp add` and VS Code setups end to end and paste real output
-  - author review by Abdullah
--->
-
 # Finding the *fastest* hospital in Dhaka with AI and Geoapify: MCP vs. OpenAPI
 
 *By Abdullah Atif. Built for the [Geoapify](https://www.geoapify.com/) Open Geospatial Program, Batch #2: AI × Geospatial.*
@@ -69,9 +62,14 @@ key in the `x-api-key` header. In Claude Code:
 claude mcp add --transport http geoapify https://api.geoapify.com/v1/mcp --header "x-api-key: YOUR_API_KEY"
 ```
 
-<!-- TODO screenshot: Claude Code /mcp showing geoapify connected (key hidden) -->
+Check that it is connected:
 
-Setup for VS Code and other clients is in
+```text
+$ claude mcp list
+geoapify: https://api.geoapify.com/v1/mcp (HTTP) - ✔ Connected
+```
+
+I tested this command with Claude Code 2.1. Setup for VS Code and other clients (not tested by me) is in
 [agent/MCP_SETUP.md](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/agent/MCP_SETUP.md).
 
 ### Tell the agent how to behave
@@ -141,7 +139,7 @@ Nearest hospital by drive travel time:
 
 Add `--map out.html` to get a Leaflet map with Geoapify tiles and the route to the first result.
 
-<!-- TODO screenshot: out.html map for Farmgate -->
+![HTML map for Farmgate: your position (blue), hospitals (markers) and the route to the fastest one (red)](images/farmgate-map.jpg)
 
 ### The core of it
 
@@ -205,13 +203,15 @@ heuristic, so verify before relying on it.
 
 ## Part 5: Feedback for Geoapify
 
-From building this, my suggestions are:
+The full list, with evidence for each point, is in [feedback.md](feedback.md). The main suggestions:
 
 - Understand Dhaka abbreviations: `R/A` → Residential Area, `Gulshan 1 Circle`.
 - Penalise single-token matches for landmark queries ("BUET" → "BUET-TPHS Building").
 - Wrong places (up to about 15 km away) returned as `full_match` make `match_type` less useful as a quality signal.
 - Small typo in the API: `match_by_city_or_disrict`.
 - MCP `geocode_address` could tell agents in its description to check `match_type` before using the result.
+- An MCP tool for place details or outlines. Today `search_places` returns points only.
+- A Places condition for hospitals with an emergency department (OpenStreetMap `emergency=yes`).
 
 ---
 
