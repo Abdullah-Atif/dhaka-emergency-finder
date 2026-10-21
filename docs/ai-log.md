@@ -134,6 +134,17 @@ emergency facilities only, and a 10-location benchmark.
 - Mistake caught before shipping: the "different place" hint list had `quarter`, which would also have flagged
   "Fire Service & Civil Defence Headquarter". It was removed, and a test covers that case.
 
+## 2026-10-22: demo key for the hosted web app
+
+- Created a second free-plan key just for the web app and restricted it in the Geoapify project to Origin
+  `^https://abdullah-atif\.github\.io$` and Referer `^https://abdullah-atif\.github\.io/`. Regex anchors matter:
+  the dialog says a pattern can match *any part* of the origin, so a plain `https://abdullah-atif.github.io` would
+  also match `https://abdullah-atif.github.io.evil.com`.
+- Tested with curl: another site's Origin → 401; our Origin or Referer → 200; map tiles with our Referer → 200;
+  **no Origin and no Referer → 200**. So the restriction stops other websites, but not scripts. Added to
+  [feedback.md](feedback.md). The original key (used by the CLI and MCP setups) was left unrestricted, because
+  command-line requests send no Origin.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

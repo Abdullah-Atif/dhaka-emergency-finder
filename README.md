@@ -129,6 +129,9 @@ You need Python 3.9 or newer. There are no third-party packages.
 | `--json` | machine-readable output |
 
 > The HTML map contains your API key (for map tiles). Do not publish generated maps.
+>
+> The hosted web app uses its own free demo key in `docs/app/config.js`, restricted in Geoapify to this site's
+> address. Don't reuse that key elsewhere; get your own at <https://myprojects.geoapify.com>.
 
 ## Quick start: AI agent (MCP)
 

@@ -43,6 +43,12 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
    `emergency_department.yes`).
 7. **Near-duplicate places.** "radda" and "RADDA" (about 5 m apart) are both returned for Mirpur 10.
 
+8. **Key restrictions do not reject requests without the header.** A key limited to Origin
+   `^https://abdullah-atif\.github\.io$` and a matching Referer returned **401** for another site's Origin, but
+   **200** for a plain request that sent neither header (tested with curl). So a browser key copied from a public
+   page still works from any script or server. *Suggestion:* an option such as "require a matching Origin or
+   Referer" for keys meant only for the browser.
+
 ## MCP tools
 
 1. **No outline or place-details tool.** `search_places` returns points only (one result had
