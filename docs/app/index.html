@@ -6,6 +6,10 @@
 <title>Dhaka Emergency Finder</title>
 <meta name="description" content="Find the hospital, pharmacy, police or fire station in Dhaka that you can reach fastest. Powered by Geoapify.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#b00020">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root {
     --bg: #f6f7f9; --card: #ffffff; --text: #16191d; --muted: #5d6670; --line: #dfe3e8;
@@ -90,6 +94,11 @@
          line-height: 26px; font-weight: 700; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
   .pin.best { background: var(--danger); color: #fff; }
   .pin.major { background: #1e6b34; color: #fff; }
+  .fix { margin: 8px 0 0; font-size: .82rem; }
+  .fix a { color: var(--muted); }
+  .maptools { margin: 0 0 6px; }
+  .maptools p { margin: 6px 0 0; }
+  #reachbtn[aria-pressed=true] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   #keybox { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 12px; margin-top: 14px; }
   #keybox form { display: flex; gap: 8px; margin-top: 8px; }
   footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
@@ -147,19 +156,24 @@
 
   <p class="status" id="status" hidden></p>
   <div id="map" hidden></div>
+  <div class="maptools" id="maptools" hidden>
+    <button class="btn small" id="reachbtn" aria-pressed="false">🕒 <span>Show 10 / 15 min reach</span></button>
+    <p class="muted small" id="reachnote" hidden></p>
+  </div>
   <section id="results" aria-live="polite"></section>
 
   <footer>
     Ranked by travel time with approximate traffic. Data © OpenStreetMap contributors, powered by
     <a href="https://www.geoapify.com/">Geoapify</a>. Open source:
     <a href="https://github.com/Abdullah-Atif/dhaka-emergency-finder">GitHub</a> ·
-    <a href="../tutorial.html">How it was built</a>
+    <a href="../tutorial.html">How it was built</a> ·
+    <a href="coverage.html">Emergency coverage map of Dhaka</a>
   </footer>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="config.js?v=20261022f"></script>
+<script src="config.js?v=20261023a"></script>
 <script src="config.local.js"></script><!-- optional, git-ignored: local test key -->
-<script src="classify.js?v=20261022f"></script>
-<script src="app.js?v=20261022f"></script>
+<script src="classify.js?v=20261023a"></script>
+<script src="app.js?v=20261023a"></script>
 </body>
 </html>

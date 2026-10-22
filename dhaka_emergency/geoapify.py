@@ -6,6 +6,7 @@ https://apidocs.geoapify.com/open-api/
 
 import json
 import os
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -94,6 +95,20 @@ class GeoapifyClient:
             if cell.get("time") is not None and cell.get("distance") is not None:
                 out[cell["target_index"]] = {"distance": cell["distance"], "time": cell["time"]}
         return out
+
+    def isoline(self, lon, lat, ranges_s=(600, 900), mode="drive", traffic="approximated", wait_s=8):
+        """Isoline API: areas reachable within each time range (seconds). Returns a GeoJSON FeatureCollection,
+        one feature per range. A long calculation answers with an id and no features; then ask again by id."""
+        params = {"lat": lat, "lon": lon, "type": "time", "mode": mode, "range": ",".join(str(r) for r in ranges_s)}
+        if mode not in ("walk", "hike", "bicycle", "mountain_bike", "road_bike"):
+            params["traffic"] = traffic
+        data = self._request(f"{BASE_V1}/isoline", params)
+        for _ in range(wait_s):
+            if data.get("features") or not (data.get("properties") or {}).get("id"):
+                break
+            time.sleep(1)
+            data = self._request(f"{BASE_V1}/isoline", {"id": data["properties"]["id"]})
+        return data
 
     def route(self, start, end, mode="drive", traffic="approximated"):
         """Routing API between two (lon, lat) points. Returns a GeoJSON feature."""

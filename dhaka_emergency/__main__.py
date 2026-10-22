@@ -59,10 +59,14 @@ def main(argv=None):
     ap.add_argument("--major", action="store_true",
                     help="hospitals: only major ones (confirmed 24h emergency, government, medical college)")
     ap.add_argument("--map", metavar="FILE.html", help="also write an HTML map with the route to #1")
+    ap.add_argument("--reach", action="store_true",
+                    help="with --map: shade the areas reachable in 10 and 15 minutes (Isoline API)")
     ap.add_argument("--json", action="store_true", help="print machine-readable JSON")
     args = ap.parse_args(argv)
     if args.major and args.kind != "hospital":
         ap.error("--major works with --type hospital")
+    if args.reach and not args.map:
+        ap.error("--reach needs --map FILE.html")
 
     try:
         client = GeoapifyClient()
@@ -76,10 +80,12 @@ def main(argv=None):
         major = None if args.major or args.kind != "hospital" else nearest_major(everything)
         if major is not None and ranked and major is ranked[0]:
             major = None
-        route = None
+        route = reach = None
         if args.map and ranked and ranked[0].drive_s is not None:
             best = ranked[0]
             route = client.route((origin.lon, origin.lat), (best.lon, best.lat), mode=args.mode)
+        if args.reach:
+            reach = client.isoline(origin.lon, origin.lat, mode=args.mode)
     except GeoapifyError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
@@ -127,7 +133,7 @@ def main(argv=None):
 
     if args.map and ranked:
         write_map(args.map, origin, ranked, route, client.api_key,
-                  title=f"{args.kind.title()} near {origin.label}")
+                  title=f"{args.kind.title()} near {origin.label}", reach=reach)
         print(f"\nMap written to {args.map}", file=sys.stderr)
     return 0
 

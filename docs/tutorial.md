@@ -244,6 +244,16 @@ What it does differently from a plain "nearest hospital" search:
 - **It merges duplicates** ("radda" and "RADDA", 5 m apart, were both in the Places results).
 - **Bangla and English** interface, a **Navigate** button that opens directions in Google Maps, and **tap-to-call** for
   places that have a phone number in the map data.
+- **🕒 10 / 15 min reach:** one tap shades the area you can reach in 10 and 15 minutes, from the
+  [Isoline API](https://apidocs.geoapify.com/docs/isolines/) (3 credits), and says how many of the listed places fall
+  inside it.
+- **📤 Share:** sends "I am going to X, about 12 min by car" with map links to where you are and where you are going
+  (the phone's share menu, or WhatsApp on a computer).
+- **✏️ Fix it on OpenStreetMap:** every card links to the place on OpenStreetMap (Places returns `osm_type` and
+  `osm_id`), so anyone who sees a wrong name or a missing phone number can correct it for every app, not only this one.
+- **Works like an app:** it can be installed to the home screen (web app manifest + service worker), opens without a
+  network, and then shows **your last search** with a clear "no internet" note. The Geoapify calls themselves are never
+  cached: emergency data must be live.
 
 The browser calls Geoapify directly. Geoapify answers with `access-control-allow-origin: *`, so a static page is
 enough. The pure logic (ranking, duplicate merging, the warning heuristics) has its own tests:
@@ -329,6 +339,9 @@ Outside the samples, a real test with the AI agent found one dangerous miss. Two
 "Rehabilitation", so the country's main trauma hospital was pushed to the end. Now the confirmed-hospital check also
 reads the text inside brackets and fixes that typo, and both entries are confirmed again.
 
+A third, larger check after all fixes: [50 fresh places, **47 right**](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/classify_review.md).
+The 3 misses (an office, a nuclear-medicine institute, "DigiLab") all came out as "unknown", again never as a wrong answer.
+
 What it still cannot do: say how big a hospital is or which departments it has. That data is simply not in the map,
 and fixing it upstream in OpenStreetMap would help every app.
 
@@ -354,7 +367,43 @@ Route Matrix: 1 per target) instead of about 13, so a free key covers roughly 10
 
 ---
 
-## Part 7: Feedback for Geoapify
+## Part 7: How much of Dhaka is within 15 minutes of an emergency department?
+
+The app answers "where do I go from *here*?". The same APIs can answer a city-wide question too.
+[`benchmark/coverage.py`](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/coverage.py)
+(standard library only):
+
+1. takes the **Dhaka Metropolitan boundary** (OSM "ঢাকা মহানগর") from the Geoapify
+   [Boundaries API](https://apidocs.geoapify.com/docs/boundaries/) `part-of` endpoint;
+2. finds every hospital in and around it with the Places API and keeps the ones the classifier from Part 6 can
+   defend: **set A** = confirmed general 24-hour emergency departments + government general hospitals (11 after
+   merging entries of one campus); **set B** = A + medical college hospitals (26);
+3. asks the **Isoline API** for the area reachable by car in 10 and 15 minutes from each of them (traffic approximated);
+4. lays a 300 m grid over the boundary (304 km²) and checks which points fall inside any isoline.
+
+| Hospitals counted | Within 10 min | Within 15 min |
+|---|---|---|
+| A: confirmed + government (11) | **12%** of the area | **28%** |
+| B: A + medical college hospitals (26) | 30% | 54% |
+
+![Coverage map: green within 15 minutes of a confirmed or government emergency department, red beyond](images/coverage.jpg)
+
+[Open the interactive coverage map](https://abdullah-atif.github.io/dhaka-emergency-finder/app/coverage.html) ·
+[method and caveats](https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/coverage.md)
+
+The public emergency departments cluster in the old city and around Shahbag; most of the metropolitan area, east and
+north, relies on private hospitals whose emergency units nobody has verified. Read it with its limits: it measures
+**area, not people**, uses Geoapify's typical-traffic model rather than rush hour, and treats isolines that go *out of*
+a hospital as minutes *to* it. It also found a data gap: Bangladesh Specialized Hospital, whose 24-hour emergency
+department is confirmed, is not in the map data as a hospital at all, so it could not be counted.
+
+Two classifier fixes came out of this run: the map spells Shaheed Suhrawardy Medical College Hospital "Shahid
+**Sohrawardy**" and "Shaheed **Suhrawardi**", so this 1,000-bed government hospital was being shown as an unverified
+private one; and Dhaka Mohanagar General Hospital (Dhaka South City Corporation) was missing from the government list.
+
+---
+
+## Part 8: Feedback for Geoapify
 
 The full list, with evidence for each point, is in [feedback.md](feedback.md). The main suggestions:
 
@@ -367,12 +416,15 @@ The full list, with evidence for each point, is in [feedback.md](feedback.md). T
 - A Places condition for hospitals with an emergency department (OpenStreetMap `emergency=yes`).
 - MCP `search_places` drops the OSM tags (`emergency`, `name:en`, `opening_hours`), which the REST Places API returns.
 - Address Autocomplete returns nothing for partial Bangla words, while search finds them.
+- An Isoline option for the reverse direction ("from where can I reach this point in 15 minutes?"), which is what
+  emergency coverage needs.
 
 ---
 
 ## Try it
 
-**In your browser:** <https://abdullah-atif.github.io/dhaka-emergency-finder/app/>
+**In your browser:** <https://abdullah-atif.github.io/dhaka-emergency-finder/app/> ·
+[coverage map](https://abdullah-atif.github.io/dhaka-emergency-finder/app/coverage.html)
 
 **From the command line:**
 

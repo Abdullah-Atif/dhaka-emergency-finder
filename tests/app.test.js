@@ -89,3 +89,8 @@ test("nearest major hospital: the first major one with a travel time", () => {
   assert.strictEqual(app.nearestMajor(ranked).n, "C");
   assert.strictEqual(app.nearestMajor([{ n: "A", time: 60 }]), null);
 });
+
+test("OpenStreetMap link from Places osm_type / osm_id", () => {
+  assert.strictEqual(app.osmUrl("n", 4206412116), "https://www.openstreetmap.org/node/4206412116");
+  assert.strictEqual(app.osmUrl("x", 1), "");
+});

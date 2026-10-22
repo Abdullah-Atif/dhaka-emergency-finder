@@ -274,5 +274,45 @@
   "ed": "confirmed",
   "speciality": "trauma",
   "major": false
+ },
+ {
+  "name": "Shahid Sohrawardy Medical College and Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "yes",
+  "speciality": null,
+  "major": true
+ },
+ {
+  "name": "Shaheed Suhrawardi Medical College Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "yes",
+  "speciality": null,
+  "major": true
+ },
+ {
+  "name": "Dhaka Mohanagar General Hospital, Babubazar Bridge, Dhaka",
+  "nameEn": null,
+  "tags": {},
+  "ed": "yes",
+  "speciality": null,
+  "major": true
+ },
+ {
+  "name": "Institute of Nuclear Medicine",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null,
+  "major": false
+ },
+ {
+  "name": "DigiLab",
+  "nameEn": null,
+  "tags": {},
+  "ed": "no",
+  "speciality": null,
+  "major": false
  }
 ]

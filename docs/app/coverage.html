@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dhaka Emergency Coverage</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #16191d; --muted: #5d6670; --line: #dfe3e8;
+    --accent: #1565c0; --accent-text: #ffffff; --chip: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101317; --card: #1a1f25; --text: #e9edf1; --muted: #9aa5b1; --line: #2b323a;
+      --accent: #5aa2f0; --accent-text: #0b1520; --chip: #232a32;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.45 system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.3rem; margin: 4px 0 6px; }
+  p { margin: 6px 0; }
+  .muted { color: var(--muted); } .small { font-size: .85rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .chips button { border: 1px solid var(--line); background: var(--chip); color: var(--text); border-radius: 999px;
+                  padding: 7px 12px; font-size: .92rem; cursor: pointer; }
+  .chips button[aria-pressed=true] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  #map { height: 70vh; min-height: 380px; border-radius: 10px; border: 1px solid var(--line); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 10px 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .88rem; margin: 8px 0; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="small"><a href="./">← Dhaka Emergency Finder</a></p>
+  <h1>How much of Dhaka is within 15 minutes of an emergency department?</h1>
+  <p class="muted small">Each square is 300 m. Travel by car with approximated traffic (Geoapify Isoline API), from
+    hospitals whose 24-hour emergency department is confirmed or expected. <a
+    href="https://github.com/Abdullah-Atif/dhaka-emergency-finder/blob/main/benchmark/coverage.md">Method and caveats</a>.</p>
+  <div class="chips" role="group" aria-label="Hospitals counted">
+    <button data-set="a" aria-pressed="true">A: confirmed + government</button>
+    <button data-set="b" aria-pressed="false">B: A + medical college hospitals</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="muted small">Hospitals</span><b id="s-n">–</b></div>
+    <div class="stat"><span class="muted small">Area within 10 min</span><b id="s-10">–</b></div>
+    <div class="stat"><span class="muted small">Area within 15 min</span><b id="s-15">–</b></div>
+  </div>
+  <div class="legend">
+    <span><i class="sw" style="background:#1b7f3a"></i>within 10 min</span>
+    <span><i class="sw" style="background:#7cc68d"></i>10–15 min</span>
+    <span><i class="sw" style="background:#d9534f"></i>more than 15 min</span>
+    <span><i class="sw" style="background:#1565c0;border-radius:99px"></i>hospital</span>
+  </div>
+  <div id="map"></div>
+  <p class="muted small" id="date"></p>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="config.js?v=20261023a"></script>
+<script src="config.local.js"></script><!-- optional, git-ignored: local test key -->
+<script>
+(function () {
+  "use strict";
+  var key = (window.DEF_CONFIG || {}).apiKey || "";
+  var map = L.map("map", { preferCanvas: true });
+  L.tileLayer("https://maps.geoapify.com/v1/tile/osm-bright-grey/{z}/{x}/{y}.png?apiKey=" + encodeURIComponent(key), {
+    maxZoom: 18,
+    attribution: 'Powered by <a href="https://www.geoapify.com/">Geoapify</a> | &copy; OpenStreetMap contributors',
+  }).addTo(map);
+  var cells = L.layerGroup().addTo(map), pins = L.layerGroup().addTo(map), data = null, set = "a";
+  var COLORS = { 10: "#1b7f3a", 15: "#7cc68d", 0: "#d9534f" };
+
+  function draw() {
+    cells.clearLayers(); pins.clearLayers();
+    var hx = data.grid_m / 2 / (111320 * Math.cos(23.78 * Math.PI / 180)), hy = data.grid_m / 2 / 111320;
+    data.grid.forEach(function (c) {
+      L.rectangle([[c.y - hy, c.x - hx], [c.y + hy, c.x + hx]],
+        { stroke: false, fillColor: COLORS[c[set]], fillOpacity: 0.45, interactive: false }).addTo(cells);
+    });
+    data.hospitals.filter(function (h) { return set === "b" || h.set === "A"; }).forEach(function (h) {
+      L.circleMarker([h.lat, h.lon], { radius: 6, color: "#fff", weight: 2, fillColor: h.set === "A" ? "#1565c0" : "#6a1b9a",
+        fillOpacity: 1 }).addTo(pins).bindPopup("<b>" + h.name.replace(/[<>&]/g, "") + "</b><br>" +
+          (h.set === "A" ? "confirmed / government" : "medical college hospital"));
+    });
+    var n = data.hospitals.filter(function (h) { return set === "b" || h.set === "A"; }).length;
+    document.getElementById("s-n").textContent = n;
+    document.getElementById("s-10").textContent = Math.round(data.pct[set + "10"]) + "%";
+    document.getElementById("s-15").textContent = Math.round(data.pct[set + "15"]) + "%";
+  }
+
+  document.querySelectorAll("[data-set]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      set = b.getAttribute("data-set");
+      document.querySelectorAll("[data-set]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+      if (data) draw();
+    });
+  });
+
+  fetch("coverage.json?v=20261023a").then(function (r) { return r.json(); }).then(function (d) {
+    data = d;
+    var outline = L.geoJSON(d.boundary, { style: { color: "#455a64", weight: 2, fill: false }, interactive: false }).addTo(map);
+    map.fitBounds(outline.getBounds(), { padding: [10, 10] });
+    document.getElementById("date").textContent = "Map data and isolines from " + d.date + ". Area, not population: " +
+      "every square counts the same.";
+    draw();
+  });
+})();
+</script>
+</body>
+</html>

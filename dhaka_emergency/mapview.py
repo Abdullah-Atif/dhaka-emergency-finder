@@ -38,6 +38,14 @@ data.places.forEach((p, i) => {{
     .bindPopup('<b>#' + (i + 1) + ' ' + p.name + '</b><br>' + mins + '<br>' + p.address + (p.phone ? '<br>' + p.phone : ''));
 }});
 let all = L.latLngBounds(bounds);
+if (data.reach && data.reach.features && data.reach.features.length) {{
+  // 10 and 15 minute areas; largest first so the 10-minute area is on top
+  const feats = data.reach.features.slice().sort((a, b) => b.properties.range - a.properties.range);
+  const layer = L.geoJSON({{type: 'FeatureCollection', features: feats}}, {{interactive: false,
+    style: f => ({{color: '#2e7d32', weight: 1, fillColor: '#43a047', fillOpacity: f.properties.range <= 600 ? 0.28 : 0.14}})}}).addTo(map);
+  layer.bringToBack();
+  all = layer.getBounds().extend(all);
+}}
 if (data.route) {{
   const layer = L.geoJSON(data.route, {{style: {{color: '#b00020', weight: 5}}}}).addTo(map);
   all = layer.getBounds().extend(all);
@@ -56,7 +64,7 @@ window.addEventListener('resize', fit);
 """
 
 
-def write_map(path, origin, facilities, route_feature, api_key, title=""):
+def write_map(path, origin, facilities, route_feature, api_key, title="", reach=None):
     data = {
         "origin": {"lon": origin.lon, "lat": origin.lat, "label": origin.label},
         "places": [
@@ -71,6 +79,7 @@ def write_map(path, origin, facilities, route_feature, api_key, title=""):
             for f in facilities
         ],
         "route": route_feature,
+        "reach": reach,  # Isoline API FeatureCollection (10 / 15 min), optional
     }
     page = TEMPLATE.format(
         data=json.dumps(data, ensure_ascii=False).replace("</", "<\\/"),

@@ -202,6 +202,23 @@ class FinderTests(unittest.TestCase):
         self.assertIn("999", text)
         self.assertNotIn("<script>x</script>", text)
 
+    def test_osm_link(self):
+        self.assertEqual(finder.osm_url("w", 369448879), "https://www.openstreetmap.org/way/369448879")
+        self.assertEqual(finder.osm_url(None, 5), "")
+
+    def test_map_with_reach_area(self):
+        client = FakeClient()
+        origin, ranked = finder.find(client, "Mirpur 10")
+        reach = {"type": "FeatureCollection", "features": [
+            {"type": "Feature", "properties": {"range": 900},
+             "geometry": {"type": "Polygon", "coordinates": [[[90.36, 23.80], [90.38, 23.80], [90.37, 23.82], [90.36, 23.80]]]}}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "m.html")
+            write_map(path, origin, ranked, None, "test-key", reach=reach)
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+        self.assertIn('"range": 900', text)
+
 
 if __name__ == "__main__":
     unittest.main()

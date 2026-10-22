@@ -7,7 +7,7 @@
 
   var DHAKA = { lat: 23.8103, lon: 90.4125 };
   var SEARCH_RADIUS = 10000;
-  var RULES_VERSION = "20261022f";
+  var RULES_VERSION = "20261023a";
   var MAX_CANDIDATES = 10;
   // Hospitals: also rank the nearest few major hospitals, found among the 200 nearest places (about 6 km in central
   // Dhaka; 100 reach only about 4 km). Cost: 11 Places credits instead of 1.
@@ -84,6 +84,12 @@
     return out;
   }
 
+  // The place's page on OpenStreetMap (anyone can fix a wrong name or tag there). Places gives osm_type n / w / r.
+  function osmUrl(type, id) {
+    var kind = { n: "node", w: "way", r: "relation" }[type];
+    return kind && id ? "https://www.openstreetmap.org/" + kind + "/" + id : "";
+  }
+
   // Geoapify Autocomplete returns nothing for partial Bangla words ("ধানমন্ডি"), while /geocode/search finds them.
   function isBangla(text) { return /[\u0980-\u09ff]/.test(text || ""); }
   function isLatLon(text) { return /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(text || ""); }
@@ -125,7 +131,7 @@
     return out;
   }
 
-  var helpers = { isMajor: isMajor, nearestMajor: nearestMajor, withMajor: withMajor,
+  var helpers = { osmUrl: osmUrl, isMajor: isMajor, nearestMajor: nearestMajor, withMajor: withMajor,
                   demoteNonEmergency: demoteNonEmergency, isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, isCoarse: isCoarse,
                   rankByTime: rankByTime, dedupe: dedupe, maybeOtherPlace: maybeOtherPlace, CATEGORIES: CATEGORIES };
   if (typeof module !== "undefined" && module.exports) { module.exports = helpers; return; }
@@ -160,6 +166,12 @@
       majorhint: "Large general hospitals: a confirmed 24-hour emergency department, government hospitals and medical college hospitals. The map has no bed counts.",
       majorcard: "Nearest major hospital", majorslower: "{x} min more than #1", majorbadge: "Major hospital",
       nomajor: "No major hospital found within 10 km. Turn off “Major hospitals only” to see all places.",
+      reach: "Show 10 / 15 min reach", reachhide: "Hide reach", reacherr: "Could not load the reach area.",
+      reachnote: "Shaded: where you can get {mode} in 10 min (dark) and 15 min (light). {n} of the {m} places in the list are within 15 min.",
+      by_drive: "by car", by_motorcycle: "by motorcycle", by_walk: "on foot",
+      fixosm: "Wrong or missing information? Fix it on OpenStreetMap",
+      offline: "No internet. Showing your last search ({t}); times may be out of date. You can still call 999.",
+      share: "Share", sharetext: "I am going to {name}: about {time} {mode}.", shareme: "I am here:", sharedest: "Going to:",
       keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
       keysave: "Save key", geoerr: "Could not get your location. Type it instead.",
       disclaimer: "Map data may be incomplete. A place may be closed or have no emergency department. Times are estimates with approximate traffic.",
@@ -192,6 +204,12 @@
       majorhint: "বড় সাধারণ হাসপাতাল: সূত্রে নিশ্চিত ২৪ ঘণ্টা জরুরি বিভাগ, সরকারি হাসপাতাল ও মেডিকেল কলেজ হাসপাতাল। ম্যাপে শয্যা সংখ্যা নেই।",
       majorcard: "কাছের বড় হাসপাতাল", majorslower: "১ নম্বরের চেয়ে {x} মিনিট বেশি", majorbadge: "বড় হাসপাতাল",
       nomajor: "১০ কিমির মধ্যে কোনো বড় হাসপাতাল পাওয়া যায়নি। সব জায়গা দেখতে “শুধু বড় হাসপাতাল” বন্ধ করুন।",
+      reach: "১০ / ১৫ মিনিটে কতদূর যাওয়া যায়", reachhide: "এলাকা লুকান", reacherr: "এলাকাটা আনা যায়নি।",
+      reachnote: "রং করা এলাকা: {mode} ১০ মিনিটে (গাঢ়) ও ১৫ মিনিটে (হালকা) যতদূর যাওয়া যায়। তালিকার {m}টির মধ্যে {n}টি ১৫ মিনিটের মধ্যে।",
+      by_drive: "গাড়িতে", by_motorcycle: "মোটরসাইকেলে", by_walk: "হেঁটে",
+      fixosm: "তথ্য ভুল বা নেই? OpenStreetMap-এ ঠিক করুন",
+      offline: "ইন্টারনেট নেই। আপনার শেষ খোঁজটি দেখানো হচ্ছে ({t}); সময় পুরোনো হতে পারে। ৯৯৯-এ কল করা যাবে।",
+      share: "শেয়ার", sharetext: "আমি {name}-এ যাচ্ছি: {mode} প্রায় {time}।", shareme: "আমি এখানে:", sharedest: "যেখানে যাচ্ছি:",
       keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
       keysave: "Key সেভ করুন", geoerr: "অবস্থান পাওয়া যায়নি। হাতে লিখে দিন।",
       disclaimer: "ম্যাপের তথ্য অসম্পূর্ণ হতে পারে। কোনো জায়গা বন্ধ থাকতে পারে বা সেখানে জরুরি বিভাগ না-ও থাকতে পারে। সময় আনুমানিক, যানজট ধরে।",
@@ -200,7 +218,7 @@
   };
 
   var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false, rules: null,
-                majorOnly: false, resultsKind: null };
+                majorOnly: false, resultsKind: null, resultsMode: "drive", reachLayer: null };
   var map, markerLayer;
   var $ = function (id) { return document.getElementById(id); };
   function t(k) { return T[state.lang][k]; }
@@ -272,6 +290,7 @@
           phone: (p.contact || {}).phone || raw.phone || raw["contact:phone"] || "",
           straight: haversineM(origin.lat, origin.lon, p.lat, p.lon), time: null, dist: null,
           tags: { opening_hours: raw.opening_hours },
+          osm: osmUrl(raw.osm_type, raw.osm_id),
           cls: (state.rules && window.FacilityClassifier && (kind === "hospital" || kind === "clinic"))
             ? window.FacilityClassifier.classify(state.rules, { name: p.name, nameEn: raw["name:en"], nameBn: raw["name:bn"],
                 tags: { emergency: raw.emergency, healthcare: raw.healthcare, "healthcare:speciality": raw["healthcare:speciality"],
@@ -295,6 +314,20 @@
       });
       return demoteNonEmergency(rankByTime(items));
     });
+  }
+
+  // Areas reachable in 10 and 15 minutes (Isoline API: one GeoJSON feature per range, 3 credits). A long calculation
+  // answers with an id and no features; then ask again by id.
+  function isoline(origin, mode) {
+    var q = "https://api.geoapify.com/v1/isoline?type=time&range=600,900&mode=" + mode +
+      (mode !== "walk" ? "&traffic=approximated" : "") + "&lat=" + origin.lat + "&lon=" + origin.lon;
+    function poll(d, tries) {
+      if ((d.features || []).length || tries <= 0 || !(d.properties || {}).id) return d;
+      return new Promise(function (r) { setTimeout(r, 1000); }).then(function () {
+        return getJSON("https://api.geoapify.com/v1/isoline?id=" + encodeURIComponent(d.properties.id));
+      }).then(function (d2) { return poll(d2, tries - 1); });
+    }
+    return getJSON(q).then(function (d) { return poll(d, 8); });
   }
 
   function route(origin, dest, mode) {
@@ -345,12 +378,32 @@
     return html;
   }
 
+  function fixLink(f) {
+    return f.osm ? '<p class="fix"><a href="' + esc(f.osm) + '" target="_blank" rel="noopener">✏️ ' + esc(t("fixosm")) + "</a></p>" : "";
+  }
+
   // key: index into shown(), or "major" for the nearest-major-hospital card
   function actions(f, key) {
     var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
     var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
       f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
-    return '<div class="actions"><button class="btn small" data-route="' + key + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div>";
+    return '<div class="actions"><button class="btn small" data-route="' + key + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav +
+      '<button class="btn small" data-share="' + key + '">📤 ' + esc(t("share")) + "</button></div>";
+  }
+
+  // "I am going to X", with Google Maps links to where I am and where I am going (the links open on any phone).
+  function shareText(f) {
+    var o = state.origin;
+    function link(lat, lon) { return "https://maps.google.com/?q=" + lat.toFixed(6) + "," + lon.toFixed(6); }
+    return t("sharetext").replace("{name}", displayName(f)).replace("{time}", fmtMin(f.time))
+      .replace("{mode}", t("by_" + state.resultsMode)) +
+      "\n" + t("shareme") + " " + link(o.lat, o.lon) + "\n" + t("sharedest") + " " + link(f.lat, f.lon);
+  }
+  function shareTrip(f) {
+    if (!f) return;
+    var text = shareText(f);
+    if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
   }
 
   function displayName(f) { return state.lang === "bn" && f.nameBn ? f.nameBn : f.name; }
@@ -384,7 +437,7 @@
         '<div class="row"><h3>' + esc(displayName(mj)) + '</h3><span class="time">' + esc(fmtMin(mj.time)) + "</span></div>" +
         '<p class="meta">' + esc(fmtKm(mj.dist)) + " " + esc(t("byroad")) +
         (extra > 0 ? " · " + esc(t("majorslower").replace("{x}", extra)) : "") + "</p>" +
-        (mj.address ? '<p class="addr">' + esc(mj.address) + "</p>" : "") + clsBadge(mj) + actions(mj, "major") + "</article>";
+        (mj.address ? '<p class="addr">' + esc(mj.address) + "</p>" : "") + clsBadge(mj) + actions(mj, "major") + fixLink(mj) + "</article>";
     }
     shown().forEach(function (f, i) {
       html += '<article class="card' + (i === 0 ? " best" : "") + '">' +
@@ -395,7 +448,7 @@
         (f.cls ? clsBadge(f) : (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" : "")) +
         (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" : "") +
         (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
-        actions(f, i) + "</article>";
+        actions(f, i) + fixLink(f) + "</article>";
     });
     if (!state.pending && visible().length > 5) {
       html += '<button class="btn small more" id="more">' +
@@ -408,12 +461,19 @@
     }
     html += '<p class="muted small">' + esc(t("disclaimer")) + "</p>";
     list.innerHTML = html;
+    renderReachUI();
     var more = $("more");
     if (more) more.addEventListener("click", function () { state.showAll = !state.showAll; renderResults(); drawMap(); });
     list.querySelectorAll("[data-route]").forEach(function (b) {
       b.addEventListener("click", function () {
         var k = b.getAttribute("data-route");
         showRoute(k === "major" ? majorCard() : shown()[+k]);
+      });
+    });
+    list.querySelectorAll("[data-share]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-share");
+        shareTrip(k === "major" ? majorCard() : shown()[+k]);
       });
     });
   }
@@ -449,6 +509,46 @@
     map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17, animate: false });
   }
 
+  function clearReach() {
+    if (state.reachLayer) { map.removeLayer(state.reachLayer); state.reachLayer = null; }
+  }
+  function toggleReach() {
+    if (state.reachLayer) { clearReach(); renderReachUI(); return; }
+    var o = state.origin, btn = $("reachbtn");
+    btn.disabled = true;
+    isoline(o, state.resultsMode).then(function (d) {
+      if (o !== state.origin) return;
+      // largest first, so the 10-minute area is drawn on top
+      var feats = (d.features || []).slice().sort(function (a, b) { return b.properties.range - a.properties.range; });
+      if (!feats.length) throw new Error("no isoline");
+      state.reachLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
+        interactive: false,
+        style: function (f) {
+          return { color: "#2e7d32", weight: 1, fillColor: "#43a047", fillOpacity: f.properties.range <= 600 ? 0.28 : 0.14 };
+        },
+      }).addTo(map);
+      state.reachLayer.bringToBack();
+      map.fitBounds(state.reachLayer.getBounds(), { padding: [20, 20], animate: false });
+      renderReachUI();
+    }).catch(function () {
+      $("reachnote").hidden = false;
+      $("reachnote").textContent = t("reacherr");
+    }).then(function () { btn.disabled = false; });
+  }
+  function renderReachUI() {
+    var on = !!state.reachLayer, note = $("reachnote");
+    $("maptools").hidden = !state.results.length || state.pending;
+    $("reachbtn").setAttribute("aria-pressed", String(on));
+    $("reachbtn").querySelector("span").textContent = t(on ? "reachhide" : "reach");
+    note.hidden = !on;
+    if (on) {
+      var list = visible();
+      var n = list.filter(function (f) { return f.time != null && f.time <= 900; }).length;
+      note.textContent = t("reachnote").replace("{mode}", t("by_" + state.resultsMode))
+        .replace("{n}", n).replace("{m}", list.length);
+    }
+  }
+
   function showRoute(f) {
     if (!f || f.time == null) return;
     route(state.origin, f, state.mode).then(function (feat) {
@@ -460,6 +560,28 @@
       map.fitBounds(b, { padding: [30, 30], maxZoom: 17, animate: false });
       $("map").scrollIntoView({ behavior: "smooth", block: "nearest" });
     }).catch(function () {});
+  }
+
+  // The last search, kept in this browser so the app still shows something without a network.
+  function saveLast() {
+    try {
+      localStorage.setItem("lastSearch", JSON.stringify({ origin: state.origin, kind: state.resultsKind,
+        mode: state.resultsMode, at: Date.now(), results: state.results }));
+    } catch (e) {}
+  }
+  function showLast() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem("lastSearch") || "null"); } catch (e) {}
+    if (!s || !s.results || !s.results.length) return false;
+    state.origin = s.origin; state.results = s.results; state.resultsKind = s.kind; state.resultsMode = s.mode;
+    state.pending = false; state.showAll = false;
+    var when = new Date(s.at).toLocaleString(state.lang === "bn" ? "bn-BD" : "en-GB",
+      { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    setStatus("📴 " + esc(t("offline").replace("{t}", when)), "error");
+    $("map").hidden = false;
+    renderResults();
+    drawMap();
+    return true;
   }
 
   function run(originPromise) {
@@ -477,6 +599,8 @@
         // Show the nearest places at once; re-sort when travel times arrive.
         state.results = items.slice().sort(function (a, b) { return a.straight - b.straight; });
         state.resultsKind = kind;
+        state.resultsMode = mode;
+        clearReach();
         state.pending = true;
         if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
         $("map").hidden = false;
@@ -488,6 +612,7 @@
       state.pending = false;
       if (!ranked) return;
       state.results = ranked;
+      saveLast();
       if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
       $("map").hidden = false;
       renderResults();
@@ -495,13 +620,16 @@
       showRoute(shown()[0]);
     }).catch(function (e) {
       state.pending = false;
+      // fetch() rejects with a TypeError when there is no network
+      if ((e instanceof TypeError || !navigator.onLine) && showLast()) return;
       setStatus(esc(String(e.message || e)), "error");
     });
   }
 
   function loadRules() {
     fetch("facility_rules.json?v=" + RULES_VERSION).then(function (r) { return r.json(); })
-      .then(function (j) { state.rules = j; }).catch(function () { state.rules = null; });
+      .then(function (j) { state.rules = j; if (state.results.length) renderResults(); })
+      .catch(function () { state.rules = null; });
   }
 
   function init() {
@@ -522,6 +650,7 @@
         $("majorwrap").hidden = state.kind !== "hospital";
       });
     });
+    $("reachbtn").addEventListener("click", toggleReach);
     try { state.majorOnly = localStorage.getItem("majorOnly") === "1"; } catch (e) {}
     var majorBox = $("majoronly");
     majorBox.checked = state.majorOnly;
@@ -619,6 +748,11 @@
     });
     if (!apiKey()) $("keybox").hidden = false;
     renderText();
+    if (!navigator.onLine) showLast();
+    // Installable app + offline start (service workers need https or localhost)
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);

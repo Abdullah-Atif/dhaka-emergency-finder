@@ -28,7 +28,8 @@ From the [10-location Dhaka benchmark](benchmark/results.md) ([manual review](be
 |---|---|
 | The nearest hospital **on the map** was **not** the fastest to reach by car | **8 of 9** locations; **at least 1 min** faster in 6 of 9 (up to 6.9 min) |
 | The fastest "hospital" is, by its name, a diagnostic centre or eye hospital | **3 of 9** |
-| Dhaka's 447 map "hospitals" that are not emergency facilities (diagnostic, dental, pharmacy, chamber ...) | **60**, now labelled and moved to the end ([classifier](benchmark/classify_eval.md), [research](docs/research/hospital-classification.md)) |
+| Dhaka's 447 map "hospitals" that are not emergency facilities (diagnostic, dental, pharmacy, chamber ...) | **62**, now labelled and moved to the end ([classifier](benchmark/classify_eval.md), [research](docs/research/hospital-classification.md)) |
+| Share of Dhaka Metropolitan (304 km²) within **15 min by car** of a confirmed or government 24h emergency department | **28%** (54% when medical college hospitals are added) ([coverage analysis](benchmark/coverage.md), [map](https://abdullah-atif.github.io/dhaka-emergency-finder/app/coverage.html)) |
 | Geocoding found the right place | **8 of 10**: English 4 / 6, **Bangla 4 / 4** |
 | Silent fallback to the whole city, visible only in `match_type` ("Dhanmondi 27, Dhaka") | 1 of 10, now detected and warned by the CLI. The same place in Bangla (`ধানমন্ডি ২৭`) works. |
 | `"BUET, Dhaka"` / full English name | wrong place (Gulshan / a company in Banani). **`বুয়েট` in Bangla: correct.** |
@@ -131,6 +132,7 @@ You need Python 3.9 or newer. There are no third-party packages.
 | `--mode` | `drive` (default), `motorcycle`, `walk` |
 | `--top N` | number of results (default 5) |
 | `--map FILE.html` | write an HTML map with all results and the route to #1 |
+| `--reach` | with `--map`: shade the areas reachable in 10 and 15 minutes (Isoline API, 3 credits) |
 | `--major` | hospitals: only major ones (confirmed 24h emergency, government, medical college) |
 | `--json` | machine-readable output |
 
@@ -177,6 +179,8 @@ docs/feedback.md     feedback for Geoapify OpenAPI specs and MCP tools
 docs/research/       deep-research report: which Dhaka hospitals have an emergency department
 docs/app/facility_rules.json  name + tag rules used by classify.js (app) and classify.py (CLI)
 benchmark/           Dhaka test locations, runner (run.py), results and manual review notes
+benchmark/coverage.py  city-wide analysis: Boundaries + Places + Isoline APIs -> coverage.md, docs/app/coverage.json
+docs/app/coverage.html interactive coverage map (GitHub Pages)
 agent/sessions/      recorded agent sessions: write-up (.md) + full MCP transcript (.jsonl)
 agent/mcp_call.py    call one Geoapify MCP tool over JSON-RPC and log it (for agents without an MCP client)
 tests/               unit tests
@@ -201,6 +205,10 @@ tests/               unit tests
 - [x] First recorded agent sessions with full MCP tool-call transcripts ([agent/sessions/](agent/sessions/))
 - [x] [Tutorial](docs/tutorial.md) (GitHub Pages; dev.to copy in [docs/devto.md](docs/devto.md))
 - [x] [Feedback report for Geoapify OpenAPI / MCP](docs/feedback.md)
+- [x] Web app: emergency badges, nearest major hospital, 10 / 15 min reach (Isoline API), share, OpenStreetMap fix
+      links, installable with offline last search
+- [x] [Emergency coverage of Dhaka](benchmark/coverage.md) (Boundaries + Isoline APIs) and a third
+      [hand check of the classifier](benchmark/classify_review.md) (47 / 50)
 
 ## License
 

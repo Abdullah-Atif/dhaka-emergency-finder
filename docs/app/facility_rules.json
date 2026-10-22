@@ -77,6 +77,18 @@
   [
    "traumtology",
    "traumatology"
+  ],
+  [
+   "sohrawardy",
+   "suhrawardy"
+  ],
+  [
+   "suhrawardi",
+   "suhrawardy"
+  ],
+  [
+   "shahid suhrawardy",
+   "shaheed suhrawardy"
   ]
  ],
  "hospital_words": [
@@ -295,7 +307,8 @@
     "diagnostics",
     "diagnosis",
     "imaging",
-    "ডায়াগনস্টিক"
+    "ডায়াগনস্টিক",
+    "nuclear medicine"
    ]
   },
   {
@@ -304,7 +317,8 @@
    "bn": "ল্যাবরেটরি",
    "words": [
     "lab",
-    "ল্যাব"
+    "ল্যাব",
+    "digilab"
    ]
   },
   {
@@ -722,6 +736,7 @@
   "mugda medical college hospital",
   "mugda general hospital",
   "shaheed suhrawardy medical college hospital",
+  "shaheed suhrawardy medical college",
   "suhrawardy hospital",
   "sir salimullah medical college",
   "mitford hospital",
@@ -734,7 +749,10 @@
   "সোহরাওয়ার্দী হাসপাতাল",
   "মিটফোর্ড",
   "কুর্মিটোলা জেনারেল হাসপাতাল",
-  "কুয়েত বাংলাদেশ মৈত্রী"
+  "কুয়েত বাংলাদেশ মৈত্রী",
+  "dhaka mohanagar general hospital",
+  "mohanagar general hospital",
+  "ঢাকা মহানগর জেনারেল হাসপাতাল"
  ],
  "about_government_hospitals": "Government general hospitals named in the research report as 'likely' 24h (tier-based); shown as 'government hospital, emergency expected', not as confirmed.",
  "general_words": [

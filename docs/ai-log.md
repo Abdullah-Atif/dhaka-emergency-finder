@@ -222,6 +222,28 @@ emergency facilities only, and a 10-location benchmark.
 - In that session the Geoapify MCP server was not connected, so the agent used `agent/mcp_call.py` (same MCP tools,
   called over HTTP).
 
+## 2026-10-23: reach, coverage analysis, share, OSM links, offline app
+
+- User request: "what else can we add? ... do all of them, one by one". Seven ideas were proposed and built in order.
+- **Reach (Isoline API):** checked the docs first (ranges in seconds, up to 10 per request, `traffic`, 202 + `id` for
+  long jobs, 1 credit per 5 minutes). A live call answered synchronously in ~2-3 s with two MultiPolygons. App:
+  "10 / 15 min reach" button; CLI: `--reach` with `--map`. Both poll by `id` if the API answers 202.
+- **Coverage analysis:** the Boundaries API `part-of` gave the Dhaka Metropolitan polygon (admin_level 6). A dry run
+  listed the hospitals *before* spending isoline credits, and caught two classifier misses: the map spells
+  Shaheed Suhrawardy Medical College Hospital "Sohrawardy"/"Suhrawardi" (a large government hospital shown as
+  unverified private), and Dhaka Mohanagar General Hospital was missing from the government list. Fixed with shared
+  test cases, then 26 isolines (~130 credits, cached in `benchmark/.cache/`). Result: 28% of the area within 15 min
+  of a confirmed/government emergency department, 54% with medical college hospitals. Bangladesh Specialized Hospital
+  (confirmed) is absent from the map data; the script now reports such gaps itself.
+- **OpenStreetMap links** from Places' `osm_type`/`osm_id`; **Share** via the Web Share API with a WhatsApp fallback;
+  **PWA**: manifest, generated icons, a network-first service worker that never caches Geoapify calls, and the last
+  search kept in localStorage and shown with a "no internet" note (tested by making `fetch` fail).
+- **Third hand check:** 50 fresh places, 47 right, 3 harmless "unknown"; two fixed afterwards ("nuclear medicine",
+  "DigiLab"). The third ("Field office" in the second comma part) was left: catching it would let addresses such as
+  "Mosque Road" mislead the classifier.
+- Feedback: isolines have no reverse ("to the point") direction; Boundaries `name` stays Bangla with `lang=en`
+  (English in `name_international.en`), checked with a live call before writing it down.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

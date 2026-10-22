@@ -51,11 +51,19 @@ class Facility:
     # classify.py result for hospitals and clinics: ed = confirmed / yes / likely / specialised / unknown / no
     cls: dict = None
     opening_hours: str = ""
+    # the place's page on OpenStreetMap, where anyone can fix a wrong name or tag
+    osm_url: str = ""
 
     @property
     def maybe_not_er(self):
         """Not a general emergency hospital: a non-hospital, or one speciality only (see classify.py)."""
         return bool(self.cls) and self.cls["ed"] in ("no", "specialised")
+
+
+def osm_url(osm_type, osm_id):
+    """https://www.openstreetmap.org/node/123 for Places' osm_type n / w / r (mirrors osmUrl() in app.js)."""
+    kind = {"n": "node", "w": "way", "r": "relation"}.get(osm_type)
+    return f"https://www.openstreetmap.org/{kind}/{osm_id}" if kind and osm_id else ""
 
 
 def is_major(f):
@@ -185,6 +193,7 @@ def _to_facility(feature, origin):
         categories=cats,
         cls=cls,
         opening_hours=str(raw.get("opening_hours") or ""),
+        osm_url=osm_url(raw.get("osm_type"), raw.get("osm_id")),
     )
 
 

@@ -16,6 +16,8 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
   `geometry_scope "steps" requires include_instructions to be true` were each fixed by the agent in one retry.
 - **Route Matrix with `traffic=approximated`** answers the core question of the project in one request.
 - **Bangla input works well.** All 4 Bangla-script queries in the benchmark geocoded correctly, including Bangla digits.
+- **Isoline + Boundaries APIs** turned the per-user app into a city-wide analysis (how much of Dhaka is within 15
+  minutes of an emergency department) with about 30 requests; see REST #11 and #12.
 
 ## OpenAPI specifications / REST APIs
 
@@ -60,10 +62,20 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
 10. **Most "hospitals" in Dhaka carry no information about emergency care, and `emergency=yes` is often wrong.**
     Of 447 places in `healthcare.hospital` inside Dhaka city, 40 have an `emergency` tag, and 4 of the 35
     `emergency=yes` tags sit on a homeo pharmacy, a dental clinic, an outpatient unit and a diagnostic centre. Our
-    name-based classifier ([evaluation](../benchmark/classify_eval.md)) labels 60 of the 447 as not an emergency facility
+    name-based classifier ([evaluation](../benchmark/classify_eval.md)) labels 62 of the 447 as not an emergency facility
     (dental 10, diagnostic 7, pharmacy 7, chamber 6, outpatient 6, ...). *Suggestion:* a Places condition or category
     split for facilities with an emergency department, and moving obvious non-hospitals (`healthcare=laboratory`,
     names with "Diagnostic"/"Pharmacy") out of `healthcare.hospital`.
+
+11. **Isolines only go outwards.** For emergency coverage the question is "from where can people reach this hospital
+    in 15 minutes?", but an isoline is computed *from* the point. Our [coverage analysis](../benchmark/coverage.md)
+    has to treat the two directions as equal, which one-way streets break. *Suggestion:* a `direction=to` (reverse)
+    option. The rest worked very well: 26 isolines answered synchronously in about 2 to 3 s each, `range=600,900`
+    returns both areas in one request, and the cost (1 credit per 5 minutes) is easy to plan for.
+12. **The Boundaries API made a city-wide analysis possible in one call.** `part-of` at a point in Dhaka returned
+    the Dhaka Metropolitan polygon (OSM admin_level 6) with a simplified geometry option, which is exactly what a
+    coverage grid needs. Small surprise: `name` stays in Bangla ("ঢাকা মহানগর") even with `lang=en`; the English name
+    is only in `name_international.en` ("Dhaka Metropolitan"). The docs could say which field `lang` affects.
 
 ## MCP tools
 
