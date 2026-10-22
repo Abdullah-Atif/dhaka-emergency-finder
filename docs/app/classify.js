@@ -9,7 +9,9 @@
  *   5. speciality words (eye, children, trauma, burn, heart...) -> "specialised"
  *   6. any other "hospital" -> "likely" (private hospitals: not verified); clinics and the rest -> "unknown"
  *   7. OSM emergency=no -> "no"; emergency=yes only lifts "unknown" to "likely" (it is often wrong in Dhaka)
- * Result: { ed: "confirmed"|"yes"|"likely"|"specialised"|"unknown"|"no", type, speciality, confirmed, reasons[] }
+ * Result: { ed: "confirmed"|"yes"|"likely"|"specialised"|"unknown"|"no", type, speciality, confirmed, major, reasons[] }
+ * major: a large general hospital (confirmed general 24h emergency, government general, or a medical college hospital).
+ * The map has no bed counts, so this tier is the only size signal we can defend.
  */
 (function () {
   "use strict";
@@ -57,7 +59,7 @@
     var full = normalize(names.join(" | "), rules);           // whole names, incl. address tails
     var text = normalize(names.map(function (n) { return mainPart(n, rules); }).join(" | "), rules); // main part only
     var reasons = [];
-    var r = { ed: "unknown", type: "health", speciality: null, confirmed: null, reasons: reasons };
+    var r = { ed: "unknown", type: "health", speciality: null, confirmed: null, major: false, reasons: reasons };
 
     // 1. clear non-hospitals
     for (var i = 0; i < rules.exclude.length; i++) {
@@ -77,6 +79,7 @@
       if (hit) {
         r.ed = "confirmed"; r.type = "hospital"; r.confirmed = conf;
         if (conf.scope !== "general") r.speciality = conf.scope;
+        r.major = conf.scope === "general";
         reasons.push("24-hour emergency confirmed by a source (" + conf.source + ")");
         return r;
       }
@@ -142,6 +145,7 @@
       reasons.push("map data says emergency=yes");
       if (r.ed === "unknown") r.ed = "likely";
     }
+    r.major = r.ed === "yes" || (r.ed === "likely" && !r.speciality && !!any(text, rules.medical_college_hospital));
     return r;
   }
 

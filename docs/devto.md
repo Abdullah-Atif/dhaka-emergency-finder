@@ -332,6 +332,26 @@ hospital was hidden. And wherever the classifier disagreed with OSM's own `emerg
 What it still cannot do: say how big a hospital is or which departments it has. That data is simply not in the map,
 and fixing it upstream in OpenStreetMap would help every app.
 
+### The nearest *major* hospital
+
+The fastest place is not always the best one. From Mirpur 10 the fastest "hospital" is 2 minutes away, but its emergency
+department is unknown; a big general hospital is about half an hour away. Without bed counts, the classifier marks
+three groups as **major**: hospitals with a source-confirmed general 24-hour emergency department, government general
+hospitals, and medical college hospitals (teaching hospitals with many departments). The app then:
+
+- asks Places for the **200 nearest** hospitals instead of 10 (100 reach only about 4 km in central Dhaka), keeps the
+  10 nearest and adds up to **6 major hospitals** from further away, so they get real travel times too;
+- shows a **"Nearest major hospital"** card above the list when #1 is not a major hospital;
+- offers a **"Major hospitals only"** switch (CLI: `--major`).
+
+Two map details mattered. The same hospital often appears several times: "Shahid Sohrawardy Medical College" and
+"Shaheed Suhrawardi Medical College Hospital" 190 m apart, or three entries for PG Hospital. Distance alone cannot merge
+them, because BIRDEM is only 80 m from PG Hospital. So entries merge when they match the same confirmed hospital, or
+when they are within 300 m and the first word of the name has the same consonants ("shrwrd").
+
+The cost is honest to state: a hospital search now uses about 27 Geoapify credits (Places: 1 + 1 per 20 places;
+Route Matrix: 1 per target) instead of about 13, so a free key covers roughly 100 hospital searches a day.
+
 ---
 
 ## Part 7: Feedback for Geoapify

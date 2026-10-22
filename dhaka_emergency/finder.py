@@ -20,6 +20,10 @@ CATEGORIES = {
 # Search radius grows until enough candidates are found (metres).
 RADII = (2000, 5000, 10000)
 MAX_CANDIDATES = 10
+# Hospitals: also rank the nearest few major hospitals, found among the 200 nearest places (as the web app does;
+# about 6 km in central Dhaka, 100 reach only about 4 km). Cost: 11 Places credits instead of 1.
+MAJOR_POOL = 200
+MAX_MAJOR = 6
 
 _LATLON = re.compile(r"^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$")
 
@@ -54,6 +58,44 @@ class Facility:
         return bool(self.cls) and self.cls["ed"] in ("no", "specialised")
 
 
+def is_major(f):
+    """A large general hospital (classify.py: confirmed general 24h emergency, government, medical college).
+    The map has no bed counts, so this tier is the only size signal we can defend."""
+    return bool(f.cls and f.cls.get("major"))
+
+
+def _name_key(name):
+    """Consonants of the first real word: "Shahid Sohrawardy" and "Shaheed Suhrawardi" -> "shrwrd"."""
+    words = [w for w in re.split(r"[^a-z]+", (name or "").lower()) if w and w not in ("shaheed", "shahid", "the", "dr")]
+    return re.sub(r"[aeiouy]", "", words[0]) if words else ""
+
+
+def same_hospital(a, b):
+    """Two entries of one campus. Distance alone is not enough: BIRDEM is 80 m from PG Hospital."""
+    k = _name_key(a.name)
+    return bool(k) and k == _name_key(b.name) and haversine_m(a.lon, a.lat, b.lon, b.lat) < 300
+
+
+def with_major(facilities, want=MAX_CANDIDATES):
+    """The nearest places, plus major hospitals further away, one entry per hospital (mirrors withMajor() in
+    docs/app/app.js)."""
+    out = facilities[:want]
+    added = 0
+    for f in facilities[want:]:
+        if added >= MAX_MAJOR or not is_major(f):
+            continue
+        if any(is_major(g) and same_hospital(g, f) for g in out):
+            continue
+        out.append(f)
+        added += 1
+    return out
+
+
+def nearest_major(ranked):
+    """The fastest-to-reach major hospital in a ranked list, or None."""
+    return next((f for f in ranked if is_major(f) and f.drive_s is not None), None)
+
+
 def haversine_m(lon1, lat1, lon2, lat2):
     r = 6371000.0
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -70,6 +112,10 @@ def _norm(name):
 def same_place(a, b):
     """Same name (or one name is the start of the other, e.g. "X" and "X, Government hospital, Road, Dhaka")
     and close together. Mirrors dedupe() in docs/app/app.js."""
+    # "Shahbagh P.G. Hospital", "PG Hospital Dhaka, Bus Stop..." and "Institute of Post Graduates..." are one hospital.
+    ca, cb = (a.cls or {}).get("confirmed"), (b.cls or {}).get("confirmed")
+    if ca and cb and ca["id"] == cb["id"] and haversine_m(a.lon, a.lat, b.lon, b.lat) < 500:
+        return True
     x, y = _norm(a.name), _norm(b.name)
     if not x or not y or a.name.startswith("(unnamed)") or b.name.startswith("(unnamed)"):
         return False
@@ -142,17 +188,22 @@ def _to_facility(feature, origin):
     )
 
 
-def find_candidates(client, origin, kind, want=MAX_CANDIDATES):
+def find_candidates(client, origin, kind, want=MAX_CANDIDATES, major=False):
+    """The nearest places. major=True (hospitals): one 10 km request for the 200 nearest, then the nearest
+    `want` plus the nearest major hospitals among the rest."""
     cats = CATEGORIES[kind]
     features = []
-    for radius in RADII:
-        features = client.places(origin.lon, origin.lat, cats, radius, limit=want)
-        if len(features) >= min(want, 5):
-            break
+    if major:
+        features = client.places(origin.lon, origin.lat, cats, RADII[-1], limit=MAJOR_POOL)
+    else:
+        for radius in RADII:
+            features = client.places(origin.lon, origin.lat, cats, radius, limit=want)
+            if len(features) >= min(want, 5):
+                break
     facilities = [_to_facility(f, origin) for f in features]
     facilities.sort(key=lambda f: f.straight_m)
     facilities = dedupe(facilities)
-    return facilities[:want]
+    return with_major(facilities, want) if major else facilities[:want]
 
 
 def rank_by_travel_time(client, origin, facilities, mode="drive"):
@@ -173,11 +224,18 @@ def rank_by_travel_time(client, origin, facilities, mode="drive"):
         [f for f in ranked if f.cls and f.cls["ed"] == "no"]
 
 
-def find(client, where, kind="hospital", mode="drive", top=5):
-    """Full pipeline: geocode -> places -> route matrix -> ranked list."""
+def find_ranked(client, where, kind="hospital", mode="drive"):
+    """Full pipeline: geocode -> places -> route matrix -> the whole ranked list."""
     origin = resolve_origin(client, where)
     if origin is None:
         return None, []
-    candidates = find_candidates(client, origin, kind)
-    ranked = rank_by_travel_time(client, origin, candidates, mode=mode)
+    candidates = find_candidates(client, origin, kind, major=kind == "hospital")
+    return origin, rank_by_travel_time(client, origin, candidates, mode=mode)
+
+
+def find(client, where, kind="hospital", mode="drive", top=5, major_only=False):
+    """The top N of find_ranked(). major_only: keep only major hospitals."""
+    origin, ranked = find_ranked(client, where, kind=kind, mode=mode)
+    if major_only:
+        ranked = [f for f in ranked if is_major(f)]
     return origin, ranked[:top]

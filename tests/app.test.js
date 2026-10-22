@@ -74,3 +74,18 @@ test("non-emergency facilities move to the end, travel-time order kept otherwise
   ]);
   assert.deepStrictEqual(out.map((x) => x.n), ["A", "B", "C", "diagnostic", "pharmacy"]);
 });
+
+test("hospitals: the 10 nearest plus up to 6 major hospitals from further away", () => {
+  const near = Array.from({ length: 12 }, (_, i) => ({ n: "near" + i, cls: { major: i === 11 } }));
+  const far = Array.from({ length: 8 }, (_, i) => ({ n: "major" + i, cls: { major: true } }));
+  const out = app.withMajor(near.concat(far));
+  assert.strictEqual(out.length, 16);
+  assert.deepStrictEqual(out.slice(10).map((x) => x.n), ["near11", "major0", "major1", "major2", "major3", "major4"]);
+});
+
+test("nearest major hospital: the first major one with a travel time", () => {
+  const ranked = [{ n: "A", time: 60, cls: { major: false } }, { n: "B", time: null, cls: { major: true } },
+                  { n: "C", time: 300, cls: { major: true } }, { n: "D", time: 400 }];
+  assert.strictEqual(app.nearestMajor(ranked).n, "C");
+  assert.strictEqual(app.nearestMajor([{ n: "A", time: 60 }]), null);
+});

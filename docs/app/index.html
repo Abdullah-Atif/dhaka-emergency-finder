@@ -67,10 +67,19 @@
   .badge.info { background: var(--chip); color: var(--muted); }
   .badge.spec { background: #efe7fb; color: #5b2a99; }
   .badge.bad { background: #fde8ea; color: #a1192b; }
+  .badge.major { background: #e3eefc; color: #0d47a1; }
+  .card.major { border: 2px solid #1e6b34; }
+  .major-title { margin: 0 0 6px; font-weight: 700; font-size: .9rem; color: #1e6b34; }
+  .toggle { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
+  .toggle input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+  .hint { margin: 2px 0 0 26px; }
   @media (prefers-color-scheme: dark) {
     .badge.ok { background: #16321f; color: #8fd6a4; }
     .badge.spec { background: #2a1f3d; color: #c7a8f2; }
     .badge.bad { background: #3a171c; color: #ff9aa6; }
+    .badge.major { background: #14263f; color: #9cc4f5; }
+    .card.major { border-color: #8fd6a4; }
+    .major-title { color: #8fd6a4; }
   }
   .warn { margin: 6px 0 0; color: var(--warn); font-size: .9rem; }
   .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -80,6 +89,7 @@
   .pin { background: var(--accent); color: var(--accent-text); border-radius: 999px; text-align: center;
          line-height: 26px; font-weight: 700; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
   .pin.best { background: var(--danger); color: #fff; }
+  .pin.major { background: #1e6b34; color: #fff; }
   #keybox { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 12px; margin-top: 14px; }
   #keybox form { display: flex; gap: 8px; margin-top: 8px; }
   footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
@@ -123,6 +133,10 @@
     <button data-kind="fire" aria-pressed="false" data-t="fire">Fire service</button>
     <button data-kind="ambulance" aria-pressed="false" data-t="ambulance">Ambulance</button>
   </div>
+  <div id="majorwrap">
+    <label class="toggle"><input type="checkbox" id="majoronly"> <span data-t="majoronly">Major hospitals only</span></label>
+    <p class="muted small hint" data-t="majorhint"></p>
+  </div>
 
   <label class="h" data-t="how">How are you travelling?</label>
   <div class="chips" role="group">
@@ -143,9 +157,9 @@
   </footer>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="config.js?v=20261022d"></script>
+<script src="config.js?v=20261022e"></script>
 <script src="config.local.js"></script><!-- optional, git-ignored: local test key -->
-<script src="classify.js?v=20261022d"></script>
-<script src="app.js?v=20261022d"></script>
+<script src="classify.js?v=20261022e"></script>
+<script src="app.js?v=20261022e"></script>
 </body>
 </html>

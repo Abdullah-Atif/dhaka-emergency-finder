@@ -11,5 +11,6 @@ for (const c of cases) {
     const r = classify(rules, { name: c.name, nameEn: c.nameEn, tags: c.tags });
     assert.strictEqual(r.ed, c.ed, r.reasons.join("; "));
     assert.strictEqual(r.speciality, c.speciality, r.reasons.join("; "));
+    assert.strictEqual(r.major, c.major, "major");
   });
 }

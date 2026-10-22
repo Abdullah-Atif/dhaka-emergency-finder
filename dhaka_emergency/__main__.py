@@ -5,7 +5,7 @@ import json
 import sys
 
 from .classify import load_rules
-from .finder import CATEGORIES, EMERGENCY_NUMBER, find
+from .finder import CATEGORIES, EMERGENCY_NUMBER, find_ranked, is_major, nearest_major
 from .geoapify import GeoapifyClient, GeoapifyError
 from .mapview import write_map
 
@@ -24,6 +24,10 @@ def _label(list_, key):
 
 def _cls_line(f):
     """One line in the same words as the web app's badges."""
+    return _cls_text(f) + (" · Major hospital" if is_major(f) else "")
+
+
+def _cls_text(f):
     c, rules = f.cls, load_rules()
     spec = _label(rules["specialities"], c["speciality"]) if c["speciality"] else ""
     if c["ed"] == "confirmed":
@@ -52,16 +56,26 @@ def main(argv=None):
     ap.add_argument("--type", dest="kind", default="hospital", choices=sorted(CATEGORIES))
     ap.add_argument("--mode", default="drive", choices=["drive", "motorcycle", "walk"])
     ap.add_argument("--top", type=int, default=5, help="how many results to show (default 5)")
+    ap.add_argument("--major", action="store_true",
+                    help="hospitals: only major ones (confirmed 24h emergency, government, medical college)")
     ap.add_argument("--map", metavar="FILE.html", help="also write an HTML map with the route to #1")
     ap.add_argument("--json", action="store_true", help="print machine-readable JSON")
     args = ap.parse_args(argv)
+    if args.major and args.kind != "hospital":
+        ap.error("--major works with --type hospital")
 
     try:
         client = GeoapifyClient()
-        origin, ranked = find(client, args.where, kind=args.kind, mode=args.mode, top=args.top)
+        origin, everything = find_ranked(client, args.where, kind=args.kind, mode=args.mode)
         if origin is None:
             print(f"Could not find the location: {args.where!r}", file=sys.stderr)
             return 2
+        ranked = [f for f in everything if is_major(f)] if args.major else everything
+        ranked = ranked[:args.top]
+        # The nearest major hospital, when it is not already #1 (see the web app's "Nearest major hospital" card).
+        major = None if args.major or args.kind != "hospital" else nearest_major(everything)
+        if major is not None and ranked and major is ranked[0]:
+            major = None
         route = None
         if args.map and ranked and ranked[0].drive_s is not None:
             best = ranked[0]
@@ -75,6 +89,7 @@ def main(argv=None):
             "emergency_number": EMERGENCY_NUMBER,
             "origin": vars(origin),
             "results": [dict(vars(f), maybe_not_er=f.maybe_not_er) for f in ranked],
+            "nearest_major_hospital": dict(vars(major)) if major else None,
             "classification_rules": "docs/app/facility_rules.json",
         }, ensure_ascii=False, indent=2))
     else:
@@ -86,7 +101,7 @@ def main(argv=None):
                   '   Try a nearby landmark, a different spelling, Bangla script, or "lat,lon".')
         print(f"Nearest {args.kind} by {args.mode} travel time:\n")
         if not ranked:
-            print("  Nothing found within 10 km.")
+            print("  No major hospital found within 10 km." if args.major else "  Nothing found within 10 km.")
         for i, f in enumerate(ranked, 1):
             print(f"{i}. {f.name}")
             print(f"   {_fmt_min(f.drive_s)} | {_fmt_km(f.drive_m)} by road | {_fmt_km(f.straight_m)} straight line")
@@ -98,6 +113,13 @@ def main(argv=None):
                 print(f"   {f.address}")
             if f.phone:
                 print(f"   Phone: {f.phone}")
+        if major is not None:
+            extra = ""
+            if ranked[0].drive_s is not None:
+                extra = f" | {max(0, round((major.drive_s - ranked[0].drive_s) / 60))} min more than #1"
+            print(f"\nNearest major hospital: {major.name}")
+            print(f"   {_fmt_min(major.drive_s)} | {_fmt_km(major.drive_m)} by road{extra}")
+            print(f"   {_cls_line(major)}")
         if ranked and ranked[0].drive_s is not None:
             straight_first = min(ranked, key=lambda f: f.straight_m)
             if straight_first is not ranked[0]:

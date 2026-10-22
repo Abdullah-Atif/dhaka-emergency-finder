@@ -195,6 +195,20 @@ emergency facilities only, and a 10-location benchmark.
 - App and CLI now show a badge per place (confirmed / government / not verified / specialised / not an emergency
   facility / unknown) and move "not an emergency facility" places to the end of the list.
 
+## 2026-10-22: nearest major hospital
+
+- User request: "shouldn't we also recommend the big hospitals with more services?"
+- The map has no bed counts, so "major" = source-confirmed general 24h emergency, government general hospital, or
+  medical college hospital (`major` in classify.js / classify.py, shared test cases).
+- Measured first: the 100 nearest hospitals reach only ~4 km in central Dhaka and missed Suhrawardy (government,
+  4.5 km from Mirpur 10); 200 reach ~6 km. Cost checked on geoapify.com/pricing-details: Places 1 credit + 1 per 20
+  places, Route Matrix 1 per target, so ~27 credits per hospital search instead of ~13.
+- Duplicate entries (Sohrawardy/Suhrawardi, three PG Hospital points) wasted the major slots. Distance alone could not
+  merge them (BIRDEM is 80 m from PG Hospital), so they merge on the same confirmed hospital, or within 300 m with the
+  same consonant key of the first name word.
+- Web app: "Nearest major hospital" card + "Major hospitals only" switch (EN/BN). CLI: `--major` and a
+  "Nearest major hospital" line. Agent instructions: same rule for MCP agents.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

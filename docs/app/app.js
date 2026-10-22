@@ -7,8 +7,11 @@
 
   var DHAKA = { lat: 23.8103, lon: 90.4125 };
   var SEARCH_RADIUS = 10000;
-  var RULES_VERSION = "20261022d";
+  var RULES_VERSION = "20261022e";
   var MAX_CANDIDATES = 10;
+  // Hospitals: also rank the nearest few major hospitals, found among the 200 nearest places (about 6 km in central
+  // Dhaka; 100 reach only about 4 km). Cost: 11 Places credits instead of 1.
+  var MAJOR_POOL = 200, MAX_MAJOR = 6;
   var CATEGORIES = {
     hospital: "healthcare.hospital",
     pharmacy: "healthcare.pharmacy",
@@ -54,6 +57,9 @@
   // the shorter (cleaner) English name and any Bangla name or phone number.
   function normName(n) { return (n || "").toLowerCase().replace(/[^a-z0-9ঀ-৿]+/g, ""); }
   function samePlace(a, b) {
+    // "Shahbagh P.G. Hospital", "PG Hospital Dhaka, Bus Stop..." and "Institute of Post Graduates..." are one hospital.
+    var ca = a.cls && a.cls.confirmed, cb = b.cls && b.cls.confirmed;
+    if (ca && cb && ca.id === cb.id && haversineM(a.lat, a.lon, b.lat, b.lon) < 500) return true;
     var ka = [normName(a.name), normName(a.nameBn)].filter(Boolean);
     var kb = [normName(b.name), normName(b.nameBn)].filter(Boolean);
     var d = haversineM(a.lat, a.lon, b.lat, b.lon);
@@ -89,7 +95,38 @@
     return ok.concat(no);
   }
 
-  var helpers = { demoteNonEmergency: demoteNonEmergency, isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, isCoarse: isCoarse,
+  // "Major" = a large general hospital (classify.js: confirmed general 24h emergency, government, medical college).
+  // The map has no bed counts, so this tier is the only size signal we can defend.
+  function isMajor(f) { return !!(f.cls && f.cls.major); }
+  function nearestMajor(ranked) {
+    return ranked.filter(function (f) { return isMajor(f) && f.time != null; })[0] || null;
+  }
+  // Spelling-proof key: consonants of the first real word ("Shahid Sohrawardy" and "Shaheed Suhrawardi" -> "shrwrd").
+  function nameKey(name) {
+    var w = String(name || "").toLowerCase().split(/[^a-z]+/).filter(function (x) {
+      return x && !/^(shaheed|shahid|the|dr)$/.test(x);
+    })[0] || "";
+    return w.replace(/[aeiouy]/g, "");
+  }
+  // Two entries of one campus. Distance alone is not enough: BIRDEM is 80 m from PG Hospital.
+  function sameHospital(a, b) {
+    var k = nameKey(a.name);
+    return !!k && k === nameKey(b.name) && haversineM(a.lat, a.lon, b.lat, b.lon) < 300;
+  }
+  // The nearest places, plus major hospitals from further away that are not among them (one entry per hospital).
+  function withMajor(items) {
+    var out = items.slice(0, MAX_CANDIDATES), added = 0;
+    items.slice(MAX_CANDIDATES).forEach(function (f) {
+      if (added >= MAX_MAJOR || !isMajor(f)) return;
+      if (out.some(function (g) { return isMajor(g) && sameHospital(g, f); })) return;
+      out.push(f);
+      added++;
+    });
+    return out;
+  }
+
+  var helpers = { isMajor: isMajor, nearestMajor: nearestMajor, withMajor: withMajor,
+                  demoteNonEmergency: demoteNonEmergency, isBangla: isBangla, isLatLon: isLatLon, haversineM: haversineM, isCoarse: isCoarse,
                   rankByTime: rankByTime, dedupe: dedupe, maybeOtherPlace: maybeOtherPlace, CATEGORIES: CATEGORIES };
   if (typeof module !== "undefined" && module.exports) { module.exports = helpers; return; }
 
@@ -119,6 +156,10 @@
       open247: "Open 24/7 (map data)", source: "source",
       notfastest: "The closest on the map ({x}) is not the fastest to reach.",
       callbtn: "Call", navigate: "Navigate", route: "Show route",
+      majoronly: "Major hospitals only",
+      majorhint: "Large general hospitals: a confirmed 24-hour emergency department, government hospitals and medical college hospitals. The map has no bed counts.",
+      majorcard: "Nearest major hospital", majorslower: "{x} min more than #1", majorbadge: "Major hospital",
+      nomajor: "No major hospital found within 10 km. Turn off “Major hospitals only” to see all places.",
       keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
       keysave: "Save key", geoerr: "Could not get your location. Type it instead.",
       disclaimer: "Map data may be incomplete. A place may be closed or have no emergency department. Times are estimates with approximate traffic.",
@@ -147,6 +188,10 @@
       open247: "২৪/৭ খোলা (ম্যাপের তথ্য)", source: "সূত্র",
       notfastest: "ম্যাপে সবচেয়ে কাছেরটি ({x}) সবচেয়ে তাড়াতাড়ি পৌঁছানোর নয়।",
       callbtn: "কল", navigate: "নেভিগেট", route: "রাস্তা দেখুন",
+      majoronly: "শুধু বড় হাসপাতাল",
+      majorhint: "বড় সাধারণ হাসপাতাল: সূত্রে নিশ্চিত ২৪ ঘণ্টা জরুরি বিভাগ, সরকারি হাসপাতাল ও মেডিকেল কলেজ হাসপাতাল। ম্যাপে শয্যা সংখ্যা নেই।",
+      majorcard: "কাছের বড় হাসপাতাল", majorslower: "১ নম্বরের চেয়ে {x} মিনিট বেশি", majorbadge: "বড় হাসপাতাল",
+      nomajor: "১০ কিমির মধ্যে কোনো বড় হাসপাতাল পাওয়া যায়নি। সব জায়গা দেখতে “শুধু বড় হাসপাতাল” বন্ধ করুন।",
       keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
       keysave: "Key সেভ করুন", geoerr: "অবস্থান পাওয়া যায়নি। হাতে লিখে দিন।",
       disclaimer: "ম্যাপের তথ্য অসম্পূর্ণ হতে পারে। কোনো জায়গা বন্ধ থাকতে পারে বা সেখানে জরুরি বিভাগ না-ও থাকতে পারে। সময় আনুমানিক, যানজট ধরে।",
@@ -154,7 +199,8 @@
     },
   };
 
-  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false, rules: null };
+  var state = { lang: "en", kind: "hospital", mode: "drive", origin: null, results: [], routeLayer: null, pending: false, showAll: false, rules: null,
+                majorOnly: false, resultsKind: null };
   var map, markerLayer;
   var $ = function (id) { return document.getElementById(id); };
   function t(k) { return T[state.lang][k]; }
@@ -207,8 +253,10 @@
   }
 
   function findCandidates(origin, kind) {
-    // One request: the 10 nearest places within 10 km (bias=proximity sorts nearest first).
-    var q = "https://api.geoapify.com/v2/places?lang=en&limit=" + MAX_CANDIDATES + "&categories=" + CATEGORIES[kind] +
+    // One request: the 10 nearest places within 10 km (bias=proximity sorts nearest first). For hospitals, ask for
+    // the 200 nearest and keep the 10 nearest plus the nearest major hospitals among the rest.
+    var limit = kind === "hospital" ? MAJOR_POOL : MAX_CANDIDATES;
+    var q = "https://api.geoapify.com/v2/places?lang=en&limit=" + limit + "&categories=" + CATEGORIES[kind] +
       "&filter=circle:" + origin.lon + "," + origin.lat + "," + SEARCH_RADIUS + "&bias=proximity:" + origin.lon + "," + origin.lat;
     return getJSON(q).then(function (d) { return d.features || []; }).then(function (features) {
       return dedupe(features.map(function (ft) {
@@ -231,7 +279,7 @@
             : null,
         };
       }));
-    });
+    }).then(withMajor);
   }
 
   function rank(origin, items, mode) {
@@ -292,8 +340,17 @@
     } else {
       html = '<p class="badge info">' + esc(t("cls_unknown")) + "</p>";
     }
+    if (c.major) html += '<p class="badge major">🏥 ' + esc(t("majorbadge")) + "</p>";
     if (f.tags && f.tags.opening_hours === "24/7") html += '<p class="badge info">🕐 ' + esc(t("open247")) + "</p>";
     return html;
+  }
+
+  // key: index into shown(), or "major" for the nearest-major-hospital card
+  function actions(f, key) {
+    var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
+    var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
+      f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
+    return '<div class="actions"><button class="btn small" data-route="' + key + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div>";
   }
 
   function displayName(f) { return state.lang === "bn" && f.nameBn ? f.nameBn : f.name; }
@@ -318,10 +375,18 @@
     var html = '<p class="from">' + esc(t("from")) + ": " + esc(o.label) + "</p>";
     if (state.pending) html += '<p class="note">⏳ ' + esc(t("ranking")) + "</p>";
     if (!state.results.length) html += '<p class="muted">' + esc(t("nothing")) + "</p>";
+    else if (!visible().length) html += '<p class="muted">' + esc(t("nomajor")) + "</p>";
+    var mj = majorCard();
+    if (mj) {
+      var first = shown()[0];
+      var extra = first && first.time != null ? Math.round((mj.time - first.time) / 60) : 0;
+      html += '<article class="card major"><p class="major-title">🏥 ' + esc(t("majorcard")) + "</p>" +
+        '<div class="row"><h3>' + esc(displayName(mj)) + '</h3><span class="time">' + esc(fmtMin(mj.time)) + "</span></div>" +
+        '<p class="meta">' + esc(fmtKm(mj.dist)) + " " + esc(t("byroad")) +
+        (extra > 0 ? " · " + esc(t("majorslower").replace("{x}", extra)) : "") + "</p>" +
+        (mj.address ? '<p class="addr">' + esc(mj.address) + "</p>" : "") + clsBadge(mj) + actions(mj, "major") + "</article>";
+    }
     shown().forEach(function (f, i) {
-      var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
-      var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
-        f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
       html += '<article class="card' + (i === 0 ? " best" : "") + '">' +
         '<div class="row"><span class="rank">' + (i + 1) + '</span><h3>' + esc(displayName(f)) + "</h3>" +
         '<span class="time">' + esc(fmtMin(f.time)) + "</span></div>" +
@@ -330,13 +395,13 @@
         (f.cls ? clsBadge(f) : (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" : "")) +
         (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" : "") +
         (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
-        '<div class="actions"><button class="btn small" data-route="' + i + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav + "</div></article>";
+        actions(f, i) + "</article>";
     });
-    if (!state.pending && state.results.length > 5) {
+    if (!state.pending && visible().length > 5) {
       html += '<button class="btn small more" id="more">' +
-        esc(state.showAll ? t("showless") : t("showall").replace("{n}", state.results.length)) + "</button>";
+        esc(state.showAll ? t("showless") : t("showall").replace("{n}", visible().length)) + "</button>";
     }
-    var reach = state.results.filter(function (f) { return f.time != null; });
+    var reach = visible().filter(function (f) { return f.time != null; });
     if (!state.pending && reach.length > 1) {
       var nearest = reach.reduce(function (a, b) { return a.straight <= b.straight ? a : b; });
       if (nearest !== reach[0]) html += '<p class="note">ℹ ' + esc(t("notfastest").replace("{x}", displayName(nearest))) + "</p>";
@@ -346,11 +411,22 @@
     var more = $("more");
     if (more) more.addEventListener("click", function () { state.showAll = !state.showAll; renderResults(); drawMap(); });
     list.querySelectorAll("[data-route]").forEach(function (b) {
-      b.addEventListener("click", function () { showRoute(+b.getAttribute("data-route")); });
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-route");
+        showRoute(k === "major" ? majorCard() : shown()[+k]);
+      });
     });
   }
 
-  function shown() { return state.showAll ? state.results : state.results.slice(0, 5); }
+  function majorFilter() { return state.majorOnly && state.resultsKind === "hospital"; }
+  function visible() { return majorFilter() ? state.results.filter(isMajor) : state.results; }
+  function shown() { var v = visible(); return state.showAll ? v : v.slice(0, 5); }
+  // The nearest major hospital, when it is not already the first result (and the list is not major-only already).
+  function majorCard() {
+    if (state.pending || state.resultsKind !== "hospital" || majorFilter()) return null;
+    var mj = nearestMajor(state.results);
+    return mj && mj !== shown()[0] ? mj : null;
+  }
 
   function drawMap() {
     var o = state.origin;
@@ -363,12 +439,17 @@
         icon: L.divIcon({ className: "pin" + (i === 0 ? " best" : ""), html: String(i + 1), iconSize: [26, 26] }),
       }).addTo(markerLayer).bindPopup("<b>" + esc(displayName(f)) + "</b><br>" + esc(fmtMin(f.time)));
     });
+    var mj = majorCard();
+    if (mj && shown().indexOf(mj) < 0) {
+      bounds.push([mj.lat, mj.lon]);
+      L.marker([mj.lat, mj.lon], { icon: L.divIcon({ className: "pin major", html: "H", iconSize: [26, 26] }) })
+        .addTo(markerLayer).bindPopup("<b>" + esc(displayName(mj)) + "</b><br>" + esc(fmtMin(mj.time)));
+    }
     map.invalidateSize();
     map.fitBounds(bounds, { padding: [30, 30], maxZoom: 17, animate: false });
   }
 
-  function showRoute(i) {
-    var f = state.results[i];
+  function showRoute(f) {
     if (!f || f.time == null) return;
     route(state.origin, f, state.mode).then(function (feat) {
       if (state.routeLayer) map.removeLayer(state.routeLayer);
@@ -395,6 +476,7 @@
       return findCandidates(origin, kind).then(function (items) {
         // Show the nearest places at once; re-sort when travel times arrive.
         state.results = items.slice().sort(function (a, b) { return a.straight - b.straight; });
+        state.resultsKind = kind;
         state.pending = true;
         if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
         $("map").hidden = false;
@@ -410,7 +492,7 @@
       $("map").hidden = false;
       renderResults();
       drawMap();
-      if (ranked.length && ranked[0].time != null) showRoute(0);
+      showRoute(shown()[0]);
     }).catch(function (e) {
       state.pending = false;
       setStatus(esc(String(e.message || e)), "error");
@@ -437,7 +519,20 @@
       b.addEventListener("click", function () {
         state.kind = b.getAttribute("data-kind");
         document.querySelectorAll("[data-kind]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+        $("majorwrap").hidden = state.kind !== "hospital";
       });
+    });
+    try { state.majorOnly = localStorage.getItem("majorOnly") === "1"; } catch (e) {}
+    var majorBox = $("majoronly");
+    majorBox.checked = state.majorOnly;
+    majorBox.addEventListener("change", function () {
+      state.majorOnly = majorBox.checked;
+      try { localStorage.setItem("majorOnly", state.majorOnly ? "1" : ""); } catch (e) {}
+      if (!state.results.length || state.pending) return;
+      if (state.routeLayer) { map.removeLayer(state.routeLayer); state.routeLayer = null; }
+      renderResults();
+      drawMap();
+      showRoute(shown()[0]);
     });
     document.querySelectorAll("[data-mode]").forEach(function (b) {
       b.addEventListener("click", function () {

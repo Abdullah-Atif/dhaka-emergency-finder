@@ -73,9 +73,49 @@ class FinderTests(unittest.TestCase):
 
     def test_widens_radius_when_too_few_results(self):
         client = FakeClient()
-        finder.find(client, "Mirpur 10")
+        finder.find(client, "Mirpur 10", kind="pharmacy")
         radii = [c[2] for c in client.calls if c[0] == "places"]
         self.assertEqual(radii, [2000, 5000])
+
+    def test_hospitals_one_wide_request(self):
+        client = FakeClient()
+        finder.find(client, "Mirpur 10")
+        self.assertEqual([c[2] for c in client.calls if c[0] == "places"], [10000])
+
+    def test_major_hospitals_beyond_the_nearest_ten(self):
+        class Many(FakeClient):
+            def places(self, lon, lat, categories, radius_m, limit=20):
+                fs = [feature(f"Clinic {i}", 90.3660 + i * 0.001, 23.8075) for i in range(12)]
+                fs.append(feature("Mugda Medical College Hospital", 90.4300, 23.7300))
+                for f in fs:
+                    f["properties"]["categories"] = ["healthcare", "healthcare.hospital"]
+                return fs
+
+            def route_matrix(self, source, targets, mode="drive"):
+                return [{"distance": 1000, "time": 60 * (i + 1)} for i in range(len(targets))]
+        origin, ranked = finder.find_ranked(Many(), "Mirpur 10")
+        self.assertEqual(len(ranked), 11)                      # 10 nearest + 1 major from further away
+        self.assertEqual(finder.nearest_major(ranked).name, "Mugda Medical College Hospital")
+        _, only = finder.find(Many(), "Mirpur 10", major_only=True)
+        self.assertEqual([f.name for f in only], ["Mugda Medical College Hospital"])
+
+    def test_one_entry_per_major_hospital(self):
+        o = finder.Origin(90.40, 23.80, "x")
+
+        def hosp(name, lon, lat):
+            return finder._to_facility({"properties": {"name": name, "lon": lon, "lat": lat,
+                                                       "categories": ["healthcare.hospital"]}}, o)
+        near = [hosp(f"Clinic {i}", 90.40, 23.80) for i in range(10)]
+        far = [hosp("Shahid Sohrawardy Medical College and Hospital", 90.3690, 23.7700),
+               hosp("Shaheed Suhrawardi Medical College Hospital", 90.3700, 23.7713),   # same campus, ~190 m
+               hosp("Care Medical College Hospital Ltd", 90.3707, 23.7718),              # different, 86 m away
+               hosp("Shahbagh P.G. Hospital", 90.3960, 23.7390),
+               hosp("BIRDEM General Hospital", 90.3970, 23.7385)]                         # different, ~120 m away
+        names = [f.name for f in finder.with_major(near + far)[10:]]
+        self.assertEqual(names, ["Shahid Sohrawardy Medical College and Hospital", "Care Medical College Hospital Ltd",
+                                 "Shahbagh P.G. Hospital", "BIRDEM General Hospital"])
+        pg = [hosp("Shahbagh P.G. Hospital", 90.3960, 23.7390), hosp("PG Hospital Dhaka", 90.3955, 23.7380)]
+        self.assertEqual(len(finder.dedupe(pg)), 1)                                        # same confirmed hospital
 
     def test_uses_correct_category(self):
         client = FakeClient()

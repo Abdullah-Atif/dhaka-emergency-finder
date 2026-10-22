@@ -75,7 +75,7 @@ def classify(place, rules=None):
     full = normalize(" | ".join(names), rules)
     text = normalize(" | ".join(_main_part(n, rules) for n in names), rules)
     reasons = []
-    r = {"ed": "unknown", "type": "health", "speciality": None, "confirmed": None, "reasons": reasons}
+    r = {"ed": "unknown", "type": "health", "speciality": None, "confirmed": None, "major": False, "reasons": reasons}
 
     for ex in rules["exclude"]:
         w = _any(text, ex["words"])
@@ -95,6 +95,7 @@ def classify(place, rules=None):
             r.update(ed="confirmed", type="hospital", confirmed=conf)
             if conf["scope"] != "general":
                 r["speciality"] = conf["scope"]
+            r["major"] = conf["scope"] == "general"
             reasons.append("24-hour emergency confirmed by a source (%s)" % conf["source"])
             return r
 
@@ -166,4 +167,6 @@ def classify(place, rules=None):
         reasons.append("map data says emergency=yes")
         if r["ed"] == "unknown":
             r["ed"] = "likely"
+    # major: a large general hospital (see classify.js); the map has no bed counts.
+    r["major"] = r["ed"] == "yes" or (r["ed"] == "likely" and not r["speciality"] and bool(mch))
     return r

@@ -17,7 +17,8 @@ class ClassifyTests(unittest.TestCase):
         for c in CASES:
             with self.subTest(name=c["name"]):
                 r = classify({"name": c["name"], "nameEn": c["nameEn"], "tags": c["tags"]})
-                self.assertEqual((r["ed"], r["speciality"]), (c["ed"], c["speciality"]), "; ".join(r["reasons"]))
+                self.assertEqual((r["ed"], r["speciality"], r["major"]), (c["ed"], c["speciality"], c["major"]),
+                                 "; ".join(r["reasons"]))
 
 
 if __name__ == "__main__":

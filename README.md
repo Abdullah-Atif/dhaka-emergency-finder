@@ -131,6 +131,7 @@ You need Python 3.9 or newer. There are no third-party packages.
 | `--mode` | `drive` (default), `motorcycle`, `walk` |
 | `--top N` | number of results (default 5) |
 | `--map FILE.html` | write an HTML map with all results and the route to #1 |
+| `--major` | hospitals: only major ones (confirmed 24h emergency, government, medical college) |
 | `--json` | machine-readable output |
 
 > The HTML map contains your API key (for map tiles). Do not publish generated maps.

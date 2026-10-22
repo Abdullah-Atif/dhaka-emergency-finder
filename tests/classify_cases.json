@@ -4,7 +4,8 @@
   "nameEn": null,
   "tags": {},
   "ed": "confirmed",
-  "speciality": null
+  "speciality": null,
+  "major": true
  },
  {
   "name": "ঢাকা মেডিক্যাল কলেজ হাসপাতাল",
@@ -13,133 +14,152 @@
    "emergency": "yes"
   },
   "ed": "confirmed",
-  "speciality": null
+  "speciality": null,
+  "major": true
  },
  {
   "name": "Shahbagh P.G. Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "confirmed",
-  "speciality": null
+  "speciality": null,
+  "major": true
  },
  {
   "name": "NITOR",
   "nameEn": null,
   "tags": {},
   "ed": "confirmed",
-  "speciality": "trauma"
+  "speciality": "trauma",
+  "major": false
  },
  {
   "name": "Mugda Medical College Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "yes",
-  "speciality": null
+  "speciality": null,
+  "major": true
  },
  {
   "name": "Savar Upazila Health Complex",
   "nameEn": null,
   "tags": {},
   "ed": "yes",
-  "speciality": null
+  "speciality": null,
+  "major": true
  },
  {
   "name": "Ibn Sina Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "likely",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Labaid Specialized Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "likely",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "National Healthcare Network, Ibrahim General Hospital, Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "likely",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Monowara Orthopedic and General Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "likely",
-  "speciality": "trauma"
+  "speciality": "trauma",
+  "major": false
  },
  {
   "name": "Ispahani Islamia Eye Institute and Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "eye"
+  "speciality": "eye",
+  "major": false
  },
  {
   "name": "Brain and Mind Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "mental"
+  "speciality": "mental",
+  "major": false
  },
  {
   "name": "Burn & Plastic Surgery Unit, Hospital, Secretariate Road, Dhaka Medical College Hospital, Dhaka",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "burn"
+  "speciality": "burn",
+  "major": false
  },
  {
   "name": "Azimpur Maternity Hospital, Azimpur Rd, Dhaka",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "maternity"
+  "speciality": "maternity",
+  "major": false
  },
  {
   "name": "BRAC Metarnity Centre(ব্রাক মেটারনিটি সেন্টার)",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "maternity"
+  "speciality": "maternity",
+  "major": false
  },
  {
   "name": "National Institute of Cancer Research & Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "unknown",
-  "speciality": "cancer"
+  "speciality": "cancer",
+  "major": false
  },
  {
   "name": "Puspit Nursing Home",
   "nameEn": null,
   "tags": {},
   "ed": "unknown",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Al Fateh Diagnostics",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "LabAid Limited (Diagnostic), Hospital, Doyagonj New Rd, Dhaka",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Square hospital Consultation and Diagnostic centre",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Meherun Homeo Pharmacy",
@@ -148,7 +168,8 @@
    "emergency": "yes"
   },
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Tooth Fairy",
@@ -157,7 +178,8 @@
    "emergency": "yes"
   },
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "PG Outdoor",
@@ -166,28 +188,32 @@
    "emergency": "yes"
   },
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "National Veterinary Hospital, Bangabazar Chakkar, Dhaka",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Best One Hijama Center, Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Chowdury Doctors Chamber(চৌধুরী ডক্টরস চেম্বার)",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Al Razi Hospital Complex",
@@ -196,14 +222,16 @@
    "emergency": "no"
   },
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Mosque of Bangladesh Fire Service & Civil Defence Headquarter",
   "nameEn": null,
   "tags": {},
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Some Physio Centre",
@@ -212,13 +240,23 @@
    "healthcare": "physiotherapist"
   },
   "ed": "no",
-  "speciality": null
+  "speciality": null,
+  "major": false
  },
  {
   "name": "Dr M R Khan Shishu Hospital",
   "nameEn": null,
   "tags": {},
   "ed": "specialised",
-  "speciality": "children"
+  "speciality": "children",
+  "major": false
+ },
+ {
+  "name": "Uttara Adhunik Medical College Hospital",
+  "nameEn": null,
+  "tags": {},
+  "ed": "likely",
+  "speciality": null,
+  "major": true
  }
 ]
