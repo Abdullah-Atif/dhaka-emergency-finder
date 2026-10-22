@@ -2,7 +2,7 @@
  * Network first, so a new version is used as soon as it is online; the cache is only the fallback.
  * Geoapify API calls and map tiles are never cached here: they must be live.
  */
-var CACHE = "def-20261023a";
+var CACHE = "def-20261023b";
 
 self.addEventListener("install", function () { self.skipWaiting(); });
 

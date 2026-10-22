@@ -60,7 +60,11 @@ vet clinics, and the map's own emergency=yes tag is often wrong. Before recommen
 - **Confirmed 24-hour emergency departments (sourced, checked Oct 2026):** Dhaka Medical College Hospital,
   Bangladesh Medical University (BSMMU / PG Hospital), BIRDEM, Evercare, Bangladesh Specialized Hospital; NITOR
   (trauma only); National Institute of Ophthalmology (eye only).
-- Government general hospitals (Mugda, Suhrawardy, Mitford, Kurmitola, Upazila Health Complexes): emergency expected.
+- Government general hospitals (Mugda, Suhrawardy, Mitford, Kurmitola, Dhaka Mohanagar General, Upazila Health Complexes): emergency expected.
+- **Verified emergency lines** (from each hospital's own website, checked Oct 2026; you may give these even though they
+  are not in the tool result): BIRDEM medicine emergency 02-41060479 (ext. 2302), Evercare Dhaka hotline 10678,
+  Bangladesh Specialized Hospital emergency room 01313-777771. Fire Service hotline: 102. For any other hospital, use
+  only a phone number from the tool result, or say "phone not listed".
 - Any other private "Hospital": say "emergency department not verified".
 - If a general-emergency place is only slightly slower than a non-hospital or specialised place, recommend it
   first and explain why.

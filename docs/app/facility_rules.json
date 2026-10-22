@@ -705,7 +705,15 @@
     "বারডেম জেনারেল হাসপাতাল",
     "বারডেম হাসপাতাল"
    ],
-   "source": "https://birdembd.org/?q=ermergency-services"
+   "source": "https://birdembd.org/?q=ermergency-services",
+   "emergency_phone": {
+    "tel": "+880241060479",
+    "show": "02-41060479 (ext. 2302)",
+    "en": "Medicine emergency, 24 hours",
+    "bn": "মেডিসিন জরুরি বিভাগ, ২৪ ঘণ্টা",
+    "source": "https://www.birdembd.org/service/emergencyService",
+    "checked": "2026-10-23"
+   }
   },
   {
    "id": "evercare",
@@ -719,7 +727,15 @@
     "apollo hospital dhaka",
     "এভারকেয়ার হাসপাতাল"
    ],
-   "source": "https://www.evercarebd.com/en/dhaka/specialities/accident-emergency"
+   "source": "https://www.evercarebd.com/en/dhaka/specialities/accident-emergency",
+   "emergency_phone": {
+    "tel": "10678",
+    "show": "10678",
+    "en": "Emergency hotline",
+    "bn": "জরুরি হটলাইন",
+    "source": "https://www.evercarebd.com/en/dhaka/specialities/accident-emergency",
+    "checked": "2026-10-23"
+   }
   },
   {
    "id": "bsh",
@@ -728,7 +744,15 @@
    "aliases": [
     "bangladesh specialized hospital"
    ],
-   "source": "https://bdspecializedhospital.com/department/emergency"
+   "source": "https://bdspecializedhospital.com/department/emergency",
+   "emergency_phone": {
+    "tel": "+8801313777771",
+    "show": "01313-777771",
+    "en": "Emergency room",
+    "bn": "জরুরি বিভাগ",
+    "source": "https://www.bdspecializedhospital.com/department/emergency",
+    "checked": "2026-10-23"
+   }
   }
  ],
  "confirmed_checked": "2026-10",
@@ -798,5 +822,6 @@
   "রোড",
   "সড়ক",
   "ঢাকা"
- ]
+ ],
+ "emergency_phone_note": "Only numbers an official hospital page labels as emergency / hotline. DMCH, BMU, NITOR and NIOH publish no such number (switchboard or daytime only), so none is shown. Checked 2026-10-23, not by calling."
 }

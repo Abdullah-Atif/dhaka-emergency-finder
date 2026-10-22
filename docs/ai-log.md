@@ -241,6 +241,11 @@ emergency facilities only, and a 10-location benchmark.
 - **Third hand check:** 50 fresh places, 47 right, 3 harmless "unknown"; two fixed afterwards ("nuclear medicine",
   "DigiLab"). The third ("Field office" in the second comma part) was left: catching it would let addresses such as
   "Mosque Road" mislead the classifier.
+- **Emergency phone numbers:** a sub-agent read the official sites of the 7 confirmed hospitals (rules: official page
+  only, copy the number exactly, "not found" rather than a guess). Only 3 publish an emergency/hotline number; I
+  re-fetched those 3 pages myself before adding them to `facility_rules.json` with source and date. DMCH's own site
+  was down (HTTP 500), and NIOH's only number is staffed 8:00-14:30, so none is shown for them. Fire: 102 confirmed on
+  fireservice.gov.bd.
 - Feedback: isolines have no reverse ("to the point") direction; Boundaries `name` stays Bangla with `lang=en`
   (English in `name_international.en`), checked with a live call before writing it down.
 

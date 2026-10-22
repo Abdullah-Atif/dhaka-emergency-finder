@@ -256,6 +256,11 @@ What it does differently from a plain "nearest hospital" search:
   (the phone's share menu, or WhatsApp on a computer).
 - **✏️ Fix it on OpenStreetMap:** every card links to the place on OpenStreetMap (Places returns `osm_type` and
   `osm_id`), so anyone who sees a wrong name or a missing phone number can correct it for every app, not only this one.
+- **Verified emergency lines.** Map data rarely has a phone number, and a hospital's switchboard is not its emergency
+  room. So a separate pass read the official websites of the 7 confirmed hospitals and kept only numbers the
+  hospital itself labels emergency or hotline: **BIRDEM, Evercare and Bangladesh Specialized Hospital** publish one;
+  DMCH, BMU, NITOR and the eye institute publish only switchboard or daytime numbers, so the app shows none for them
+  rather than a wrong one. Each number carries its source link. Fire-service searches also show the **102** hotline.
 - **Works like an app:** it can be installed to the home screen (web app manifest + service worker), opens without a
   network, and then shows **your last search** with a clear "no internet" note. The Geoapify calls themselves are never
   cached: emergency data must be live.

@@ -27,6 +27,12 @@ def _cls_line(f):
     return _cls_text(f) + (" · Major hospital" if is_major(f) else "")
 
 
+def _er_line(f):
+    """A confirmed hospital's emergency line from its own website (facility_rules.json), if it publishes one."""
+    er = ((f.cls or {}).get("confirmed") or {}).get("emergency_phone")
+    return f"Emergency line: {er['show']} ({er['source']})" if er else ""
+
+
 def _cls_text(f):
     c, rules = f.cls, load_rules()
     spec = _label(rules["specialities"], c["speciality"]) if c["speciality"] else ""
@@ -105,6 +111,8 @@ def main(argv=None):
             print(f"!! Could not find {args.where!r} exactly; only {origin.label!r} matched.\n"
                   "   Results are around that centre, not your location.\n"
                   '   Try a nearby landmark, a different spelling, Bangla script, or "lat,lon".')
+        if args.kind == "fire":
+            print("Fire Service hotline: 102 (or 999)")
         print(f"Nearest {args.kind} by {args.mode} travel time:\n")
         if not ranked:
             print("  No major hospital found within 10 km." if args.major else "  Nothing found within 10 km.")
@@ -113,6 +121,8 @@ def main(argv=None):
             print(f"   {_fmt_min(f.drive_s)} | {_fmt_km(f.drive_m)} by road | {_fmt_km(f.straight_m)} straight line")
             if f.cls:
                 print(f"   {_cls_line(f)}")
+            if _er_line(f):
+                print(f"   {_er_line(f)}")
             if f.opening_hours == "24/7":
                 print("   Open 24/7 (map data)")
             if f.address:
@@ -126,6 +136,8 @@ def main(argv=None):
             print(f"\nNearest major hospital: {major.name}")
             print(f"   {_fmt_min(major.drive_s)} | {_fmt_km(major.drive_m)} by road{extra}")
             print(f"   {_cls_line(major)}")
+            if _er_line(major):
+                print(f"   {_er_line(major)}")
         if ranked and ranked[0].drive_s is not None:
             straight_first = min(ranked, key=lambda f: f.straight_m)
             if straight_first is not ranked[0]:

@@ -7,7 +7,7 @@
 
   var DHAKA = { lat: 23.8103, lon: 90.4125 };
   var SEARCH_RADIUS = 10000;
-  var RULES_VERSION = "20261023a";
+  var RULES_VERSION = "20261023b";
   var MAX_CANDIDATES = 10;
   // Hospitals: also rank the nearest few major hospitals, found among the 200 nearest places (about 6 km in central
   // Dhaka; 100 reach only about 4 km). Cost: 11 Places credits instead of 1.
@@ -170,6 +170,7 @@
       reachnote: "Shaded: where you can get {mode} in 10 min (dark) and 15 min (light). {n} of the {m} places in the list are within 15 min.",
       by_drive: "by car", by_motorcycle: "by motorcycle", by_walk: "on foot",
       fixosm: "Wrong or missing information? Fix it on OpenStreetMap",
+      firehotline: "Fire Service hotline (or 999):",
       offline: "No internet. Showing your last search ({t}); times may be out of date. You can still call 999.",
       share: "Share", sharetext: "I am going to {name}: about {time} {mode}.", shareme: "I am here:", sharedest: "Going to:",
       keytitle: "Geoapify API key needed", keyhelp: "This demo needs a free Geoapify API key. It is stored only in this browser.",
@@ -208,6 +209,7 @@
       reachnote: "রং করা এলাকা: {mode} ১০ মিনিটে (গাঢ়) ও ১৫ মিনিটে (হালকা) যতদূর যাওয়া যায়। তালিকার {m}টির মধ্যে {n}টি ১৫ মিনিটের মধ্যে।",
       by_drive: "গাড়িতে", by_motorcycle: "মোটরসাইকেলে", by_walk: "হেঁটে",
       fixosm: "তথ্য ভুল বা নেই? OpenStreetMap-এ ঠিক করুন",
+      firehotline: "ফায়ার সার্ভিস হটলাইন (বা ৯৯৯):",
       offline: "ইন্টারনেট নেই। আপনার শেষ খোঁজটি দেখানো হচ্ছে ({t}); সময় পুরোনো হতে পারে। ৯৯৯-এ কল করা যাবে।",
       share: "শেয়ার", sharetext: "আমি {name}-এ যাচ্ছি: {mode} প্রায় {time}।", shareme: "আমি এখানে:", sharedest: "যেখানে যাচ্ছি:",
       keytitle: "Geoapify API key দরকার", keyhelp: "এই ডেমো চালাতে একটা ফ্রি Geoapify API key লাগবে। এটা শুধু এই ব্রাউজারেই থাকবে।",
@@ -383,8 +385,17 @@
   }
 
   // key: index into shown(), or "major" for the nearest-major-hospital card
+  // A confirmed hospital's emergency line, from its own website (facility_rules.json), wins over the map's phone.
+  function erPhone(f) { return (f.cls && f.cls.confirmed && f.cls.confirmed.emergency_phone) || null; }
+  function erLine(f) {
+    var p = erPhone(f);
+    return p ? '<p class="addr">🚑 ' + esc(p[state.lang === "bn" ? "bn" : "en"]) + ": <b>" + esc(p.show) + '</b> · <a href="' +
+      esc(p.source) + '" target="_blank" rel="noopener">' + esc(t("source")) + "</a></p>" : "";
+  }
+
   function actions(f, key) {
-    var phone = f.phone ? '<a class="btn small" href="tel:' + esc(f.phone.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
+    var tel = erPhone(f) ? erPhone(f).tel : f.phone;
+    var phone = tel ? '<a class="btn small" href="tel:' + esc(tel.replace(/[^+\d]/g, "")) + '">📞 ' + esc(t("callbtn")) + "</a>" : "";
     var nav = '<a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' +
       f.lat + "," + f.lon + '">🧭 ' + esc(t("navigate")) + "</a>";
     return '<div class="actions"><button class="btn small" data-route="' + key + '">🗺 ' + esc(t("route")) + "</button>" + phone + nav +
@@ -427,6 +438,8 @@
     var o = state.origin, list = $("results");
     var html = '<p class="from">' + esc(t("from")) + ": " + esc(o.label) + "</p>";
     if (state.pending) html += '<p class="note">⏳ ' + esc(t("ranking")) + "</p>";
+    // Fire Service & Civil Defence hotline (fireservice.gov.bd, checked 2026-10-23); 999 also reaches it.
+    if (state.resultsKind === "fire") html += '<p class="note">🔥 ' + esc(t("firehotline")) + ' <a href="tel:102"><b>102</b></a></p>';
     if (!state.results.length) html += '<p class="muted">' + esc(t("nothing")) + "</p>";
     else if (!visible().length) html += '<p class="muted">' + esc(t("nomajor")) + "</p>";
     var mj = majorCard();
@@ -437,7 +450,8 @@
         '<div class="row"><h3>' + esc(displayName(mj)) + '</h3><span class="time">' + esc(fmtMin(mj.time)) + "</span></div>" +
         '<p class="meta">' + esc(fmtKm(mj.dist)) + " " + esc(t("byroad")) +
         (extra > 0 ? " · " + esc(t("majorslower").replace("{x}", extra)) : "") + "</p>" +
-        (mj.address ? '<p class="addr">' + esc(mj.address) + "</p>" : "") + clsBadge(mj) + actions(mj, "major") + fixLink(mj) + "</article>";
+        (mj.address ? '<p class="addr">' + esc(mj.address) + "</p>" : "") + clsBadge(mj) + erLine(mj) +
+        actions(mj, "major") + fixLink(mj) + "</article>";
     }
     shown().forEach(function (f, i) {
       html += '<article class="card' + (i === 0 ? " best" : "") + '">' +
@@ -447,7 +461,7 @@
         (f.address ? '<p class="addr">' + esc(f.address) + "</p>" : "") +
         (f.cls ? clsBadge(f) : (maybeOtherPlace(f.name) ? '<p class="warn">⚠ ' + esc(t("other")) + "</p>" : "")) +
         (f.unnamed ? '<p class="warn">⚠ ' + esc(t("unnamedwarn")) + "</p>" : "") +
-        (f.phone ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
+        erLine(f) + (f.phone && !erPhone(f) ? '<p class="addr">' + esc(f.phone) + "</p>" : "") +
         actions(f, i) + fixLink(f) + "</article>";
     });
     if (!state.pending && visible().length > 5) {
