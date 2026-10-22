@@ -103,7 +103,7 @@ terminal table / JSON / HTML map (Leaflet + Geoapify tiles)
 
 You need Python 3.9 or newer. There are no third-party packages.
 
-1. Get a free API key at <https://myprojects.geoapify.com>.
+1. Get a free API key at <https://myprojects.geoapify.com>, or use the demo key below.
 2. Set it as an environment variable:
 
    ```bash
@@ -112,6 +112,10 @@ You need Python 3.9 or newer. There are no third-party packages.
    # Windows PowerShell
    $env:GEOAPIFY_API_KEY = "your_key"
    ```
+
+   > **Demo key for reviewers:** `55f4820e20b54b8c909660fb2529887f`
+   > Demo key provided by Geoapify for the Open Geospatial Program (free plan, limited usage).
+   > For your own projects, get a free key at <https://myprojects.geoapify.com>.
 3. Run it:
 
    ```bash
