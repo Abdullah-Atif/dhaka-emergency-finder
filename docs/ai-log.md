@@ -209,6 +209,19 @@ emergency facilities only, and a 10-location benchmark.
 - Web app: "Nearest major hospital" card + "Major hospitals only" switch (EN/BN). CLI: `--major` and a
   "Nearest major hospital" line. Agent instructions: same rule for MCP agents.
 
+## 2026-10-22: agent test found a NITOR miss
+
+- The user tested the agent (Claude Code, Bangla prompt, Mirpur 10, turn-by-turn route + nearest major hospital).
+  The answer followed the instructions: 999 first, 3 hospitals by travel time, "not verified" badges, a 4-step route,
+  nearest major hospital. The agent itself reported that `classify.py` labelled NITOR as a physio centre.
+- Cause: NITOR has 5 map entries. "... Rehabilitation (NITOR)" did not match the confirmed alias because of the
+  bracket, and "Traumtology" is a typo; both fell to the soft rule "rehabilitation → physio".
+- Fix: the confirmed check now also tries the name without "(...)" and the text inside it (this also confirmed the
+  eye institute entry "... (NIOH)"), plus the normalisation "traumtology → traumatology". Two shared test cases added.
+  Full Dhaka run: confirmed 12 → 15 (all checked by hand), not-emergency 62 → 60.
+- In that session the Geoapify MCP server was not connected, so the agent used `agent/mcp_call.py` (same MCP tools,
+  called over HTTP).
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

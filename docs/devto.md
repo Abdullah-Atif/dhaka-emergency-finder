@@ -329,6 +329,11 @@ typo "Metarnity". Because I fixed those rules on that same sample, I then checke
 2 misses ended up as "unknown", never as a wrong answer. In both samples no non-hospital was promoted and no emergency
 hospital was hidden. And wherever the classifier disagreed with OSM's own `emergency` tag, the tag was the one that was wrong.
 
+Outside the samples, a real test with the AI agent found one dangerous miss. Two of NITOR's five map entries
+("... Rehabilitation **(NITOR)**" and the typo "Traum**t**ology") were labelled a physiotherapy centre because of the word
+"Rehabilitation", so the country's main trauma hospital was pushed to the end. Now the confirmed-hospital check also
+reads the text inside brackets and fixes that typo, and both entries are confirmed again.
+
 What it still cannot do: say how big a hospital is or which departments it has. That data is simply not in the map,
 and fixing it upstream in OpenStreetMap would help every app.
 

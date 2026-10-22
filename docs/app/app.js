@@ -7,7 +7,7 @@
 
   var DHAKA = { lat: 23.8103, lon: 90.4125 };
   var SEARCH_RADIUS = 10000;
-  var RULES_VERSION = "20261022e";
+  var RULES_VERSION = "20261022f";
   var MAX_CANDIDATES = 10;
   // Hospitals: also rank the nearest few major hospitals, found among the 200 nearest places (about 6 km in central
   // Dhaka; 100 reach only about 4 km). Cost: 11 Places credits instead of 1.

@@ -28,7 +28,7 @@ From the [10-location Dhaka benchmark](benchmark/results.md) ([manual review](be
 |---|---|
 | The nearest hospital **on the map** was **not** the fastest to reach by car | **8 of 9** locations; **at least 1 min** faster in 6 of 9 (up to 6.9 min) |
 | The fastest "hospital" is, by its name, a diagnostic centre or eye hospital | **3 of 9** |
-| Dhaka's 447 map "hospitals" that are not emergency facilities (diagnostic, dental, pharmacy, chamber ...) | **62**, now labelled and moved to the end ([classifier](benchmark/classify_eval.md), [research](docs/research/hospital-classification.md)) |
+| Dhaka's 447 map "hospitals" that are not emergency facilities (diagnostic, dental, pharmacy, chamber ...) | **60**, now labelled and moved to the end ([classifier](benchmark/classify_eval.md), [research](docs/research/hospital-classification.md)) |
 | Geocoding found the right place | **8 of 10**: English 4 / 6, **Bangla 4 / 4** |
 | Silent fallback to the whole city, visible only in `match_type` ("Dhanmondi 27, Dhaka") | 1 of 10, now detected and warned by the CLI. The same place in Bangla (`ধানমন্ডি ২৭`) works. |
 | `"BUET, Dhaka"` / full English name | wrong place (Gulshan / a company in Banani). **`বুয়েট` in Bangla: correct.** |

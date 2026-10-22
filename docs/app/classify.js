@@ -38,6 +38,21 @@
   // (keep "(...)": "LabAid Limited (Diagnostic)" says what it is)
   function firstSegment(name) { return String(name || "").split(",")[0]; }
 
+  // Names to match against the confirmed list: the first comma part, the same without "(...)", and the text inside
+  // "(...)": "National Institute of Traumatology & Orthopaedic Rehabilitation (NITOR)" -> also "nitor".
+  function heads(names, rules) {
+    var out = [];
+    names.forEach(function (n) {
+      var seg = firstSegment(n);
+      var inner = (seg.match(/\(([^)]*)\)/g) || []).map(function (m) { return m.slice(1, -1); });
+      [seg, seg.replace(/\([^)]*\)/g, " ")].concat(inner).forEach(function (h) {
+        var k = normalize(h, rules).trim();
+        if (k && out.indexOf(k) < 0) out.push(k);
+      });
+    });
+    return out;
+  }
+
   // Main part of a name: the first comma part, plus later parts that name a facility
   // ("National Healthcare Network, Ibrahim General Hospital, Hospital" keeps "Ibrahim General Hospital"),
   // but not Google-style category tails ("Hospital", "Government hospital") or addresses ("Secretariat Rd, Dhaka").
@@ -72,10 +87,10 @@
     }
 
     // 2. source-confirmed 24h emergency departments (exact name match on the main part of a name)
-    var heads = names.map(function (n) { return normalize(firstSegment(n), rules).trim(); });
+    var heads_ = heads(names, rules);
     for (var c = 0; c < rules.confirmed.length; c++) {
       var conf = rules.confirmed[c];
-      var hit = conf.aliases.some(function (a) { return heads.indexOf(normalize(a, rules).trim()) >= 0; });
+      var hit = conf.aliases.some(function (a) { return heads_.indexOf(normalize(a, rules).trim()) >= 0; });
       if (hit) {
         r.ed = "confirmed"; r.type = "hospital"; r.confirmed = conf;
         if (conf.scope !== "general") r.speciality = conf.scope;

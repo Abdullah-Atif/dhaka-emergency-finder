@@ -67,6 +67,19 @@ def _main_part(name, rules):
     return " , ".join(keep)
 
 
+def _heads(names, rules):
+    """Names to match against the confirmed list: the first comma part, the same without "(...)", and the text
+    inside "(...)" (see heads() in classify.js)."""
+    out = []
+    for n in names:
+        seg = _first_segment(n)
+        for h in [seg, re.sub(r"\([^)]*\)", " ", seg)] + re.findall(r"\(([^)]*)\)", seg):
+            k = normalize(h, rules).strip()
+            if k and k not in out:
+                out.append(k)
+    return out
+
+
 def classify(place, rules=None):
     """place: dict with name, nameEn, nameBn, tags. Returns a dict like classify.js."""
     rules = rules or load_rules()
@@ -89,7 +102,7 @@ def classify(place, rules=None):
         reasons.append("map data says healthcare=" + hc)
         return r
 
-    heads = [normalize(_first_segment(n), rules).strip() for n in names]
+    heads = _heads(names, rules)
     for conf in rules["confirmed"]:
         if any(normalize(a, rules).strip() in heads for a in conf["aliases"]):
             r.update(ed="confirmed", type="hospital", confirmed=conf)

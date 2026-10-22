@@ -60,7 +60,7 @@ recorded in this repository: [benchmark](../benchmark/), [manual review](../benc
 10. **Most "hospitals" in Dhaka carry no information about emergency care, and `emergency=yes` is often wrong.**
     Of 447 places in `healthcare.hospital` inside Dhaka city, 40 have an `emergency` tag, and 4 of the 35
     `emergency=yes` tags sit on a homeo pharmacy, a dental clinic, an outpatient unit and a diagnostic centre. Our
-    name-based classifier ([evaluation](../benchmark/classify_eval.md)) labels 62 of the 447 as not an emergency facility
+    name-based classifier ([evaluation](../benchmark/classify_eval.md)) labels 60 of the 447 as not an emergency facility
     (dental 10, diagnostic 7, pharmacy 7, chamber 6, outpatient 6, ...). *Suggestion:* a Places condition or category
     split for facilities with an emergency department, and moving obvious non-hospitals (`healthcare=laboratory`,
     names with "Diagnostic"/"Pharmacy") out of `healthcare.hospital`.

@@ -258,5 +258,21 @@
   "ed": "likely",
   "speciality": null,
   "major": true
+ },
+ {
+  "name": "National Institute of Traumatology & Orthopaedic Rehabilitation (NITOR)",
+  "nameEn": null,
+  "tags": {},
+  "ed": "confirmed",
+  "speciality": "trauma",
+  "major": false
+ },
+ {
+  "name": "National Institute Of Traumtology & Orthopedic Rehabilitation",
+  "nameEn": null,
+  "tags": {},
+  "ed": "confirmed",
+  "speciality": "trauma",
+  "major": false
  }
 ]
