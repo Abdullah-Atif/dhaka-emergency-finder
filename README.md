@@ -4,7 +4,7 @@
 
 Find the hospital, pharmacy, police station or fire station in Dhaka that you can **reach fastest**, ranked by real travel time instead of straight-line distance. Your location can be informal text, Bangla script or coordinates.
 
-There are two ways to use it:
+There are three ways to use it:
 
 | | What it is | Geoapify |
 |---|---|---|
@@ -16,8 +16,11 @@ There are two ways to use it:
 
 Built for the [Geoapify Open Geospatial Program, Batch #2: AI × Geospatial](https://www.geoapify.com/open-geospatial-program/).
 
-**Status:** working prototype (v0.1.0). The CLI is unit-tested and has been run against the live APIs. The
-10-location benchmark, three recorded agent sessions (Claude Code and VS Code + Copilot), the [tutorial](docs/tutorial.md) and the
+**Status:** v1.0.0, final submission for Batch #2. The CLI and the web app's logic are unit-tested and have been run
+against the live APIs. The 10-location benchmark, three recorded agent sessions (Claude Code and VS Code + Copilot),
+the [Dhaka coverage analysis](benchmark/coverage.md), the tutorial
+([GitHub Pages](https://abdullah-atif.github.io/dhaka-emergency-finder/tutorial.html) ·
+[DEV](https://dev.to/abdullah-atif/finding-the-fastest-hospital-in-dhaka-with-ai-and-geoapify-mcp-vs-openapi-3fnn)) and the
 [feedback report for Geoapify](docs/feedback.md) are done (see [Roadmap](#roadmap)).
 
 ## Results (live Geoapify APIs, 2026-10-21)
