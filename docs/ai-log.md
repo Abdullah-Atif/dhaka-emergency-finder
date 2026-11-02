@@ -249,6 +249,17 @@ emergency facilities only, and a 10-location benchmark.
 - Feedback: isolines have no reverse ("to the point") direction; Boundaries `name` stays Bangla with `lang=en`
   (English in `name_international.en`), checked with a live call before writing it down.
 
+## 2026-11-02: review fixes
+
+- Geoapify approved the submission and pointed out that the README's manual checklist still mentioned `--sort size`
+  (the places-of-worship feature, no longer on main). Replaced it with `--major` and `--map --reach`, both run live first.
+- While checking claims again, a live CLI run returned Bangladesh Specialized Hospital, which the coverage run of
+  23 October had reported as missing. The same Places query returns it now, and its OpenStreetMap node dates from
+  August 2026, so "not in the map data at all" was too strong. coverage.md, the tutorial and the script's wording now
+  say what was observed and when. The coverage figures are unchanged (they are from 23 October, without it).
+- The submission email gave `node --test tests/` for the JavaScript tests. It had not been run in that form, and it
+  fails on Node 24 (a directory is no longer accepted). The README now says `node --test`, which runs all 51 tests.
+
 ## Feedback ideas for Geoapify (to confirm during the benchmark)
 - Mixed coordinate order across APIs (`lat,lon` vs `lon,lat`) is a frequent AI mistake. A short
   "coordinate order" note at the top of each spec would help.

@@ -154,7 +154,7 @@ You need Python 3.9 or newer. There are no third-party packages.
 
 ```bash
 python -m unittest discover -s tests -v      # CLI (Python)
-node --test tests/app.test.js                 # web app helpers (Node 18+)
+node --test                                   # web app + classifier, 51 tests (checked with Node 24)
 ```
 
 The tests use a fake client, so they need no API key or network.
@@ -167,7 +167,8 @@ Manual checklist for real API runs:
 - [ ] Each `--type` returns results in central Dhaka
 - [ ] `--map` opens in a browser and shows markers and the route
 - [ ] Missing key → clear error message, exit code 1
-- [ ] `--sort size` lists the biggest first; containing-building sizes are shown with `<=`
+- [ ] `--major` lists only major hospitals (confirmed 24h emergency, government, medical college)
+- [ ] `--map out.html --reach` shades the areas reachable in 10 and 15 minutes
 
 ## Repository layout
 

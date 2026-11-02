@@ -404,8 +404,10 @@ The app answers "where do I go from *here*?". The same APIs can answer a city-wi
 The public emergency departments cluster in the old city and around Shahbag; most of the metropolitan area, east and
 north, relies on private hospitals whose emergency units nobody has verified. Read it with its limits: it measures
 **area, not people**, uses Geoapify's typical-traffic model rather than rush hour, and treats isolines that go *out of*
-a hospital as minutes *to* it. It also found a data gap: Bangladesh Specialized Hospital, whose 24-hour emergency
-department is confirmed, is not in the map data as a hospital at all, so it could not be counted.
+a hospital as minutes *to* it. It also found a data gap: on 23 October the Places API did not return Bangladesh
+Specialized Hospital, whose 24-hour emergency department is confirmed, so it could not be counted. (Update,
+2 November: it is returned now. Its OpenStreetMap entry dates from August, so the gap was in the data this run
+received, not in OpenStreetMap.)
 
 Two classifier fixes came out of this run: the map spells Shaheed Suhrawardy Medical College Hospital "Shahid
 **Sohrawardy**" and "Shaheed **Suhrawardi**", so this 1,000-bed government hospital was being shown as an unverified

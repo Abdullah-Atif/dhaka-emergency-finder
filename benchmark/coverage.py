@@ -210,8 +210,8 @@ def main():
         f"- Entries of one campus within {MERGE_M} m are merged before requesting isolines.",
     ]
     if missing:
-        lines.append("- **Not in the map data as a hospital** (so not counted, although its 24h emergency department "
-                     "is confirmed): " + ", ".join(missing) + ".")
+        lines.append("- **Not returned by the Places API as a hospital** in this run (so not counted, although its 24h "
+                     "emergency department is confirmed): " + ", ".join(missing) + ".")
     with open(os.path.join(ROOT, "benchmark", "coverage.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print(f"{n} points, {area_km2:.0f} km2; A={na} hospitals, B={nb}; "

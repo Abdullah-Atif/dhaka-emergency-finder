@@ -47,4 +47,5 @@ Area: Dhaka Metropolitan (OSM boundary ঢাকা মহানগর, from the
 - **Direction.** Isolines go outwards from each hospital; we read them as "minutes to reach it". One-way streets make the two directions differ.
 - **Map data.** A hospital missing from OpenStreetMap, or not recognised by its name, is not counted. Set A includes only the hospitals our rules can defend (see [classifier evaluation](classify_eval.md)); private hospitals with emergency units are not in A.
 - Entries of one campus within 300 m are merged before requesting isolines.
-- **Not in the map data as a hospital** (so not counted, although its 24h emergency department is confirmed): Bangladesh Specialized Hospital.
+- **Not returned by the Places API as a hospital** in this run (so not counted, although its 24h emergency department is confirmed): Bangladesh Specialized Hospital.
+  *Update 2026-11-02:* the same Places query returns it now. Its OpenStreetMap entry ([node 14081458202](https://www.openstreetmap.org/node/14081458202)) dates from August 2026, so the gap was in the data this run received, not in OpenStreetMap. The figures above are from 2026-10-23 and do not include it.
